@@ -2,6 +2,9 @@ import os
 import glob
 import pandas as pd
 
+'''
+Sort years, filter and Save climate data into excel files
+'''
 # ---------------------------------------
 # Paths
 # ---------------------------------------
