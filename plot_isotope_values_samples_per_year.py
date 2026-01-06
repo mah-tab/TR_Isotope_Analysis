@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 # Inputs
 # -----------------------------
 files = {
-    "d18o": r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted.xlsx",
-    "amount": r"E:\FAU master\Master Thesis\Data\amount_per_sample_sorted.xlsx",
-    "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\oxygen_percentage_per_sample_sorted.xlsx",
+    "d18o": r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted_corrected.xlsx",
+    "amount": r"E:\FAU master\Master Thesis\Data\amount_per_sample_sorted_corrected.xlsx",
+    "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
 }
 
 out_dir = r"E:\FAU master\Master Thesis\Plots"
@@ -46,6 +46,13 @@ color_map = {
 def plot_variable(excel_path: str, key: str) -> None:
     df = pd.read_excel(excel_path).sort_values("Year")
 
+    # =================================================
+    # DROP OUTLIERS (HNC_25a in 2016 & 2017)
+    # Comment / uncomment this block as needed
+    # =================================================
+    df.loc[df["Year"].isin([2016, 2017]), "HNC_25a"] = pd.NA
+    # =================================================
+
     # determine tick positions every 3 years
     year_min = int(df["Year"].min())
     year_max = int(df["Year"].max())
@@ -73,7 +80,6 @@ def plot_variable(excel_path: str, key: str) -> None:
     plt.grid(True, alpha=0.3)
 
     plt.xticks(xticks)
-
     plt.tight_layout()
 
     out_path = os.path.join(out_dir, plot_meta[key]["filename"])
@@ -81,6 +87,7 @@ def plot_variable(excel_path: str, key: str) -> None:
     plt.close()
 
     print(f"Saved: {out_path}")
+
 
 
 # -----------------------------

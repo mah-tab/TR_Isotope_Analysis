@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 # Paths (Windows)
 # -----------------------------
 data_files = {
-    "d18o": r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted.xlsx",
-    "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\oxygen_percentage_per_sample_sorted.xlsx",
-    "amount": r"E:\FAU master\Master Thesis\Data\amount_per_sample_sorted.xlsx",
+    "d18o": r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted_corrected.xlsx",
+    "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
+    "amount": r"E:\FAU master\Master Thesis\Data\amount_per_sample_sorted_corrected.xlsx",
 }
 
 output_dir = r"E:\FAU master\Master Thesis\Plots"
