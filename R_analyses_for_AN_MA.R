@@ -194,8 +194,14 @@ library(lmtest)
 # 1. Read data
 #-----------------------------------------------------------
 
-iso_chron <- read_csv(file.path(out_dir, "iso_mean_chronology_siteA.csv"))
-climate   <- read_csv("E:/FAU master/Master Thesis/Data/climate_target_siteA.csv")
+out_dir <- "E:/FAU master/Master Thesis/R outputs"
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+
+# δ18O mean chronology (prepared in Data folder)
+iso_chron <- read_csv("E:/FAU master/Master Thesis/Data/iso_mean_chronology_siteA.csv")
+
+# Climate target file (example: annual precipitation sum) ###### adjust for other variables
+climate <- read_csv("E:/FAU master/Master Thesis/Data/climate_targets_R/climate_Precip_annual_sum.csv")
 # climate must contain: Year, Target
 
 # Merge by common years
@@ -205,7 +211,7 @@ dat <- inner_join(iso_chron, climate, by = "Year")
 # 2. Define calibration period
 #-----------------------------------------------------------
 
-cal_years <- 1984:2020   # adapt if needed
+cal_years <- 1974:2023   # adapt if needed
 
 cal_dat <- dat %>%
   filter(Year %in% cal_years) %>%
@@ -378,7 +384,9 @@ ggplot(recon, aes(Year, Reconstructed)) +
 # 10. Save outputs
 #-----------------------------------------------------------
 
-write_csv(recon, file.path(out_dir, "Reconstruction_SiteA_d18O.csv"))
+target_name <- "Precip_annual_sum"  # change this when you switch climate files
+
+write_csv(recon, file.path(out_dir, paste0("Reconstruction_SiteA_d18O_", target_name, ".csv")))
 
 validation_summary <- data.frame(
   Method = c("50/50 Early→Late",
@@ -393,5 +401,5 @@ validation_summary <- data.frame(
   RMSE = c(NA, NA, NA, NA, k_rmse)
 )
 
-write_csv(validation_summary, file.path(out_dir, "Validation_Summary_SiteA_d18O.csv"))
+write_csv(validation_summary, file.path(out_dir, paste0("Validation_Summary_SiteA_d18O_", target_name, ".csv")))
 
