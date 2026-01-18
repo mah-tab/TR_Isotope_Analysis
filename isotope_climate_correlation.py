@@ -28,6 +28,8 @@ import statsmodels.api as sm
 from statsmodels.stats.stattools import durbin_watson
 from sklearn.model_selection import KFold
 
+from matplotlib.lines import Line2D
+
 
 # ------------------------------------------------------------
 # CONFIG
@@ -129,6 +131,77 @@ def reconstruction_plot(recon: pd.DataFrame, out_png: str, title: str, ylabel: s
     plt.tight_layout()
     plt.savefig(out_png, dpi=300, bbox_inches="tight")
     plt.close()
+
+def plot_dual_axis_correlation(
+    df: pd.DataFrame,
+    climate_col: str,
+    out_png: str,
+    climate_label: str = None,
+    d18o_color: str = "#FF5E69",     # red-ish for d18O
+    climate_color: str = "#1f77b4"   # blue default for climate
+) -> None:
+    """
+    Plot mean_d18O (left y-axis) and one climate variable (right y-axis) vs Year.
+    Also compute Pearson r,p and show them in a top-right legend.
+    Put a color legend bottom-left.
+    """
+    if climate_label is None:
+        climate_label = climate_col
+
+    # Drop NA for correlation (must have both series)
+    sub = df[["Year", "mean_d18O", climate_col]].dropna().copy()
+    if len(sub) < 3:
+        print(f"[SKIP PLOT] Not enough data for {climate_col} (n={len(sub)})")
+        return
+
+    # Pearson correlation between mean_d18O and climate variable
+    r, p = pearsonr(sub["mean_d18O"].astype(float), sub[climate_col].astype(float))
+
+    # xticks every 3 years
+    year_min = int(sub["Year"].min())
+    year_max = int(sub["Year"].max())
+    xticks_3y = list(range(year_min, year_max + 1, 3))
+
+    fig, ax1 = plt.subplots(figsize=(12, 5))
+
+    # Left axis: d18O
+    ax1.plot(sub["Year"], sub["mean_d18O"], linestyle="-", marker="o",
+             color=d18o_color, label="mean δ18O")
+    ax1.set_xlabel("Year")
+    ax1.set_ylabel("mean δ18O (‰)", color=d18o_color)
+    ax1.tick_params(axis="y", labelcolor=d18o_color)
+    ax1.set_xticks(xticks_3y)
+    ax1.grid(alpha=0.3)
+
+    # Right axis: climate variable
+    ax2 = ax1.twinx()
+    ax2.plot(sub["Year"], sub[climate_col], linestyle="-", marker="o",
+             color=climate_color, label=climate_label)
+    ax2.set_ylabel(climate_label, color=climate_color)
+    ax2.tick_params(axis="y", labelcolor=climate_color)
+
+    # Title
+    ax1.set_title(f"mean δ18O vs {climate_label} (yearly means)", fontsize=16, fontweight="bold")
+
+    # --- Legends ---
+    # Bottom-left: color legend (variables)
+    handles_colors = [
+        Line2D([0], [0], color=d18o_color, marker="o", linestyle="-", label="mean δ18O"),
+        Line2D([0], [0], color=climate_color, marker="o", linestyle="-", label=climate_label),
+    ]
+    leg1 = ax1.legend(handles=handles_colors, loc="lower left", frameon=True)
+
+    # Top-right: stats legend (r,p)
+    stats_handle = Line2D([], [], color="none", label=f"r = {r:.3f}\np = {p:.3g}")
+    leg2 = ax1.legend(handles=[stats_handle], loc="upper right", frameon=True, title="Pearson")
+
+    # Need both legends -> add one back
+    ax1.add_artist(leg1)
+
+    plt.tight_layout()
+    plt.savefig(out_png, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {out_png}")
 
 
 # ------------------------------------------------------------
@@ -399,3 +472,49 @@ with pd.ExcelWriter(out_xlsx, engine="openpyxl") as writer:
         pd.DataFrame(recon_summary_rows).to_excel(writer, sheet_name="reconstruction_summary", index=False)
 
 print(f"\nSaved: {out_xlsx}")
+
+# ------------------------------------------------------------
+# Dual-axis correlation plots (mean δ18O vs each climate variable)
+# ------------------------------------------------------------
+
+# Color codes per climate variable (edit if you want)
+climate_colors = {
+    "Precip": "#1f77b4",   # blue
+    "T_Mean": "#d62728",   # red
+    "T_Delta": "#ff7f0e",  # orange
+    "RH": "#2ca02c",       # green
+    "VPD": "#9467bd",      # purple
+    "es": "#8c564b",       # brown
+    "ea": "#7f7f7f",       # gray
+}
+
+# Use the same merged calibration-year table you already built: corr_base
+# corr_base already contains: Year, mean_d18O, and climate variables
+for t in targets:
+    if t not in corr_base.columns:
+        continue
+
+    # Make a clean label for titles/legend
+    label_map = {
+        "T_Mean": "Temperature (T_Mean)",
+        "Precip": "Precipitation (mean)",
+        "RH": "Relative Humidity (RH)",
+        "VPD": "Vapor Pressure Deficit (VPD)",
+        "es": "Saturation vapor pressure (es)",
+        "ea": "Actual vapor pressure (ea)",
+        "T_Delta": "ΔT (T_Max − T_Min)",
+    }
+    climate_label = label_map.get(t, t)
+
+    # File-safe name
+    safe_name = t.replace(" ", "_").replace("/", "_").replace("\\", "_")
+    out_png = os.path.join(OUT_DIR, f"correlation_mean_d18o_{safe_name}.png")
+
+    plot_dual_axis_correlation(
+        df=corr_base,
+        climate_col=t,
+        out_png=out_png,
+        climate_label=climate_label,
+        d18o_color="#FF5E69",
+        climate_color=climate_colors.get(t, "#1f77b4")
+    )
