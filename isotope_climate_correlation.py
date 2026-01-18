@@ -180,6 +180,10 @@ def plot_dual_axis_correlation(
     ax2.set_ylabel(climate_label, color=climate_color)
     ax2.tick_params(axis="y", labelcolor=climate_color)
 
+    # Apply manual y-limits if defined for this variable
+    if climate_col in CLIMATE_YLIMS:
+        ax2.set_ylim(CLIMATE_YLIMS[climate_col])
+
     # Title
     ax1.set_title(f"mean δ18O vs {climate_label} (yearly means)", fontsize=16, fontweight="bold")
 
@@ -203,6 +207,12 @@ def plot_dual_axis_correlation(
     plt.close()
     print(f"Saved: {out_png}")
 
+# Manual y-limits for selected climate variables (second y-axis)
+CLIMATE_YLIMS = {
+    "es": (3.0, 4.0),
+    "T_Mean": (12.0, 20.0),
+    "VPD": (2.0, 3.2),
+}
 
 # ------------------------------------------------------------
 # 1) Read isotope XLSX and compute yearly mean_d18O
