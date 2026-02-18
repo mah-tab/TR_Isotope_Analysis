@@ -15,9 +15,9 @@ library(readxl)
 # Paths
 # -----------------------------
 d18o_path    <- "E:/FAU master/Master Thesis/Correlation/data - next.xlsx"
-climate_path <- "E:/FAU master/Master Thesis/Correlation/sirjan_clim.xlsx"
+climate_path <- "E:/FAU master/Master Thesis/Correlation/kerman.xlsx"
 
-out_dir <- "E:/FAU master/Master Thesis/Correlation/Correlation outputs/Narrow Next Year taken/sirjan_clim"
+out_dir <- "E:/FAU master/Master Thesis/Correlation/Correlation outputs/Narrow Next Year taken/kerman"
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 # -----------------------------
