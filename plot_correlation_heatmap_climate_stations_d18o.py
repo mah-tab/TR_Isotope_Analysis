@@ -30,14 +30,14 @@ import matplotlib.pyplot as plt
 # ----------------------------
 INPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Previous Year taken"   # root only
 OUTPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Previous Year taken"
-OUTPUT_NAME = "heatmap_station_correlations_PEARSON.png" # -> change based on correlation type
+OUTPUT_NAME = "heatmap_station_correlations_KENDALL.png" # -> change based on correlation type
 
 # Which rows to read (Pearson only) -> change [pearson, spearman, kendall]
-ROW_METRIC = "maximal_calculated_metric_pearson"
-ROW_WINDOW = "optimal_time_window_pearson"
+ROW_METRIC = "maximal_calculated_metric_kendall"
+ROW_WINDOW = "optimal_time_window_kendall"
 
 # Desired Y-axis order from BOTTOM -> TOP
-INCLUDE_PARAMS = ["T_mean", "T_Min", "T_Max", "Precip", "RH", "VPD"]
+INCLUDE_PARAMS = ["T_Mean", "T_Min", "T_Max", "Precip", "RH", "VPD"]
 
 # Station display-name mapping (x-axis only) + desired order (dict order matters in Python 3.7+)
 STATION_DISPLAY = {
@@ -246,13 +246,13 @@ def main():
     )
 
     plt.title(
-        "Pearson: maximal correlation (r) + optimal time window",
+        "Kendall: maximal correlation (r) + optimal time window",
         fontsize=TITLE_FONTSIZE,
         fontweight="bold"
     )
 
     cbar = plt.colorbar(im, fraction=0.03, pad=0.02)
-    cbar.set_label("Pearson r (maximal_calculated_metric)", fontsize=CBAR_FONTSIZE, fontweight="bold")
+    cbar.set_label("Kendall r (maximal_calculated_metric)", fontsize=CBAR_FONTSIZE, fontweight="bold")
     cbar.ax.tick_params(labelsize=CBAR_FONTSIZE)
 
     # Cell gridlines
