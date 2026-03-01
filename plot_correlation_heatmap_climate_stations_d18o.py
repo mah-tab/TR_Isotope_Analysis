@@ -1,29 +1,20 @@
 """
-plot_station_heatmap_pearson.py
+Reads a folder of Excel summary tables (one per climate parameter), created in correlation_summary_analysis.py
+with y axis being the climate parameters and x axis the stations
+and plots a correlation heatmap across stations. [pearson, spearman, or kendall]
+parameters to display:
 
-Reads a folder of Excel summary tables (one per climate parameter),
-and plots a Pearson-only heatmap across stations.
+- maximal_calculated_metric_pearson
+- optimal_time_window_pearson
+(adjust suffix based on corr type)
 
-Each Excel file is assumed to have:
-- First row: header with station names in columns (col0 is parameter name)
-- First column: row labels such as:
-    maximal_calculated_metric_pearson
-    optimal_time_window_pearson
-    ...
-- Cells: values for each station.
+Changes in this version:
+- Drops/ignores stations: "Kerman - 1969" and "jiroft+Baft" (removed from all files + plot)
+- Enforces station order exactly as the keys of STATION_DISPLAY (after dropping the two)
+- Makes x/y tick labels bold
 
-Heatmap:
-- X = stations
-- Y = climate parameters (from filename)
-- Cell text = "<corr_value>\n<optimal_time_window>"
-- Color = corr_value (Pearson maximal_calculated_metric)
-
-Notes:
-- Only reads .xlsx files in INPUT_DIR ROOT (ignores subfolders).
-- Forces Y-axis order (bottom -> top) exactly as INCLUDE_PARAMS.
-
-Author: (adapted for Mahtab Arjomandi)
-Date: 2026-xx-xx
+Author: Mahtab Arjomandi
+Date: 01-03-2026
 """
 
 import os
@@ -37,27 +28,49 @@ import matplotlib.pyplot as plt
 # ----------------------------
 # CONFIG
 # ----------------------------
-INPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Next Year taken"   # <-- folder with the Excel tables (root only)
-OUTPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Next Year taken"  # <-- where to save the heatmap
-OUTPUT_NAME = "heatmap_station_correlations_PEARSON.png"
+INPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Previous Year taken"   # root only
+OUTPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Previous Year taken"
+OUTPUT_NAME = "heatmap_station_correlations_PEARSON.png" # -> change based on correlation type
 
-# Which rows to read (Pearson only)
+# Which rows to read (Pearson only) -> change [pearson, spearman, kendall]
 ROW_METRIC = "maximal_calculated_metric_pearson"
 ROW_WINDOW = "optimal_time_window_pearson"
 
 # Desired Y-axis order from BOTTOM -> TOP
 INCLUDE_PARAMS = ["T_mean", "T_Min", "T_Max", "Precip", "RH", "VPD"]
 
-# Plot settings
-FIG_W = 18
-FIG_H = 8
-ANNOT_FONTSIZE = 9
-XTICK_FONTSIZE = 10
-YTICK_FONTSIZE = 11
-TITLE_FONTSIZE = 16
+# Station display-name mapping (x-axis only) + desired order (dict order matters in Python 3.7+)
+STATION_DISPLAY = {
+    "anar": "Anar(1986-2023)",
+    "Baft": "Baft(1989-2023)",
+    "Bam_1980": "Bam(1980-2023)",
+    "Bam_clim": "Bam(1974-2023)",
+    "Kerman - 1969": "Kerman(wo ea es 1974-2023)",  # DROP
+    "kerman": "Kerman(1974-2023)",
+    "kerman_1980": "Kerman(1980-2023)",
+    "jiroft_clim": "Jiroft(1990-2023)",
+    "rafsanjan_clim": "Rafsanjan(1993-2023)",
+    "shahrebabak_clim": "Shahrebabak(1987-2023)",
+    "sirjan_clim": "Sirjan(1985-2023)",
+    "jiroft+Baft_clim": "Jiroft+Baft(1989-2023)",
+    "jiroft+Baft": "Jiroft+Baft(wo some rows1989-2023)",  # DROP
+}
+
+# Stations to completely ignore/remove (from all excel files + plot)
+DROP_STATIONS = {"Kerman - 1969", "jiroft+Baft"}
+
+# Plot settings (bigger fonts)
+FIG_W = 20
+FIG_H = 9
+
+ANNOT_FONTSIZE = 11       # text inside squares
+XTICK_FONTSIZE = 12       # x-axis station labels
+YTICK_FONTSIZE = 14       # y-axis parameter labels
+TITLE_FONTSIZE = 20       # title
+CBAR_FONTSIZE = 14        # colorbar label/ticks
 
 # Colormap: blue-white-red (negative to positive)
-CMAP = "RdBu_r"  # diverging
+CMAP = "RdBu_r"
 
 
 # ----------------------------
@@ -65,19 +78,14 @@ CMAP = "RdBu_r"  # diverging
 # ----------------------------
 def safe_param_name_from_filename(path: str) -> str:
     """
-    Extract a parameter name from filenames like:
+    Extract parameter name from:
       summary_correlations_T_mean.xlsx -> T_mean
       summary_correlations_T_Min.xlsx  -> T_Min
-    Fallback: filename without extension.
     """
     base = os.path.basename(path)
     name = os.path.splitext(base)[0]
-
     m = re.match(r"summary_correlations_(.+)$", name, flags=re.IGNORECASE)
-    if m:
-        return m.group(1)
-
-    return name
+    return m.group(1) if m else name
 
 
 def to_float_or_nan(x):
@@ -100,8 +108,11 @@ def main():
     if not xlsx_files:
         raise FileNotFoundError(f"No .xlsx files found in: {INPUT_DIR}")
 
+    # Enforced station order from STATION_DISPLAY (minus dropped stations)
+    desired_station_order = [k for k in STATION_DISPLAY.keys() if k not in DROP_STATIONS]
+    desired_station_display = [STATION_DISPLAY[k] for k in desired_station_order]
+
     all_params = []
-    stations_master = None
     corr_rows = []
     annot_rows = []
 
@@ -112,30 +123,24 @@ def main():
             continue
 
         df = pd.read_excel(fp)
-
         if df.shape[1] < 2:
             print(f"[SKIP] {fp} has too few columns.")
             continue
 
-        # First column contains row labels
         row_label_col = df.columns[0]
         df = df.copy()
         df[row_label_col] = df[row_label_col].astype(str)
 
-        # Station columns are everything except first column
-        stations = list(df.columns[1:])
+        # station columns from file (drop ignored ones)
+        file_stations = [c for c in df.columns[1:] if c not in DROP_STATIONS]
 
-        # Ensure consistent station order across all files
-        if stations_master is None:
-            stations_master = stations
-        else:
-            common = [s for s in stations_master if s in stations]
-            if len(common) == 0:
-                print(f"[SKIP] {fp} has no common station columns with previous files.")
-                continue
-            stations = common
+        # Keep only stations we care about and enforce order
+        stations = [s for s in desired_station_order if s in file_stations]
 
-        # Find Pearson rows
+        if len(stations) == 0:
+            print(f"[SKIP] {fp} has none of the desired stations after dropping columns.")
+            continue
+
         metric_row = df.loc[df[row_label_col].str.strip().str.lower() == ROW_METRIC.lower()]
         window_row = df.loc[df[row_label_col].str.strip().str.lower() == ROW_WINDOW.lower()]
 
@@ -150,11 +155,11 @@ def main():
         else:
             window_vals = {s: window_row.iloc[0][s] for s in stations}
 
-        # Build row vectors in stations_master order
+        # Build row vectors in desired_station_order length
         corr_vec = []
         annot_vec = []
 
-        for s in stations_master:
+        for s in desired_station_order:
             if s not in stations:
                 corr_vec.append(np.nan)
                 annot_vec.append("NA")
@@ -185,25 +190,23 @@ def main():
 
     corr_mat = np.array(corr_rows, dtype=float)
     annot_mat = np.array(annot_rows, dtype=object)
-    stations_master = list(stations_master)
 
     # ----------------------------
     # FORCE y-axis order (bottom -> top) exactly as INCLUDE_PARAMS
     # ----------------------------
-    if INCLUDE_PARAMS is not None:
-        idx_map = {p: i for i, p in enumerate(all_params)}
-        ordered_params = [p for p in INCLUDE_PARAMS if p in idx_map]
+    idx_map = {p: i for i, p in enumerate(all_params)}
+    ordered_params = [p for p in INCLUDE_PARAMS if p in idx_map]
 
-        if not ordered_params:
-            raise RuntimeError(
-                "None of INCLUDE_PARAMS were found in loaded parameters.\n"
-                f"Loaded: {all_params}\nWanted: {INCLUDE_PARAMS}"
-            )
+    if not ordered_params:
+        raise RuntimeError(
+            "None of INCLUDE_PARAMS were found in loaded parameters.\n"
+            f"Loaded: {all_params}\nWanted: {INCLUDE_PARAMS}"
+        )
 
-        order_idx = [idx_map[p] for p in ordered_params]
-        corr_mat = corr_mat[order_idx, :]
-        annot_mat = annot_mat[order_idx, :]
-        all_params = ordered_params
+    order_idx = [idx_map[p] for p in ordered_params]
+    corr_mat = corr_mat[order_idx, :]
+    annot_mat = annot_mat[order_idx, :]
+    all_params = ordered_params
 
     # Matplotlib y=0 is TOP; to display bottom->top order, flip rows
     corr_mat = np.flipud(corr_mat)
@@ -215,7 +218,6 @@ def main():
     # ----------------------------
     plt.figure(figsize=(FIG_W, FIG_H))
 
-    # symmetric limits around 0
     finite_vals = corr_mat[np.isfinite(corr_mat)]
     if finite_vals.size == 0:
         vmin, vmax = -1, 1
@@ -225,15 +227,23 @@ def main():
 
     im = plt.imshow(corr_mat, aspect="auto", cmap=CMAP, vmin=vmin, vmax=vmax)
 
-    # Axis ticks/labels
+    # x ticks: enforced order + bold
     plt.xticks(
-        range(len(stations_master)),
-        stations_master,
+        range(len(desired_station_order)),
+        desired_station_display,
         rotation=45,
         ha="right",
-        fontsize=XTICK_FONTSIZE
+        fontsize=XTICK_FONTSIZE,
+        fontweight="bold"
     )
-    plt.yticks(range(len(all_params)), all_params, fontsize=YTICK_FONTSIZE)
+
+    # y ticks: bold
+    plt.yticks(
+        range(len(all_params)),
+        all_params,
+        fontsize=YTICK_FONTSIZE,
+        fontweight="bold"
+    )
 
     plt.title(
         "Pearson: maximal correlation (r) + optimal time window",
@@ -241,25 +251,27 @@ def main():
         fontweight="bold"
     )
 
-    # Colorbar
     cbar = plt.colorbar(im, fraction=0.03, pad=0.02)
-    cbar.set_label("Pearson r (maximal_calculated_metric)", fontsize=12)
+    cbar.set_label("Pearson r (maximal_calculated_metric)", fontsize=CBAR_FONTSIZE, fontweight="bold")
+    cbar.ax.tick_params(labelsize=CBAR_FONTSIZE)
 
     # Cell gridlines
     ax = plt.gca()
-    ax.set_xticks(np.arange(-.5, len(stations_master), 1), minor=True)
+    ax.set_xticks(np.arange(-.5, len(desired_station_order), 1), minor=True)
     ax.set_yticks(np.arange(-.5, len(all_params), 1), minor=True)
     plt.grid(which="minor", color="white", linestyle="-", linewidth=1)
     plt.tick_params(which="minor", bottom=False, left=False)
 
     # Annotations
     for i in range(len(all_params)):
-        for j in range(len(stations_master)):
+        for j in range(len(desired_station_order)):
             txt = annot_mat[i, j]
             if txt == "NA":
                 continue
+
             val = corr_mat[i, j]
             text_color = "white" if (np.isfinite(val) and abs(val) > 0.45 * vmax) else "black"
+
             plt.text(
                 j, i, txt,
                 ha="center", va="center",
