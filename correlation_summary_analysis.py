@@ -22,8 +22,10 @@ import pandas as pd
 # ----------------------------
 # CONFIG
 # ----------------------------
+#INPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Next Year taken\All_summary_texts"  # <-- change to your folder
 INPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Next Year taken\All_summary_texts"  # <-- change to your folder
-OUTPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Next Year taken\\"
+#OUTPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Next Year taken\\"
+OUTPUT_DIR = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed\\"
 
 PARAM_NAME_IN_FILE = "T_Mean"     # exactly as in your summaries
 PARAM_NAME_IN_TABLE = "T_Mean"    # how you want it shown in the table header

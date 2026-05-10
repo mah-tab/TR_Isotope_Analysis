@@ -31,11 +31,13 @@ import statsmodels.api as sm
 # ------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------
-OUT_DIR = r"E:\FAU master\Master Thesis\R Python outputs"
+#OUT_DIR = r"E:\FAU master\Master Thesis\R Python outputs"
+OUT_DIR = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 # UPDATED: read from Excel instead of CSV
-ISO_XLSX_PATH = r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted_corrected_narrow_next_year.xlsx"
+#ISO_XLSX_PATH = r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted_corrected_narrow_next_year.xlsx"
+ISO_XLSX_PATH = r"E:\FAU master\Master Thesis\Data\d18o Data\d18o_per_sample_sorted_cleaned.xlsx"
 
 SAMPLES = ["HNC_24a", "HNC_25a", "HNC_28a", "HNC_53a", "HNC_58b"]
 

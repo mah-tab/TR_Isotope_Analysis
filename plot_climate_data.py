@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 # -----------------------------
 # Paths
 # -----------------------------
-in_file = r"E:\FAU master\Master Thesis\Data\climate data\kerman.xlsx"
-out_dir = r"E:\FAU master\Master Thesis\Plots"
+#in_file = r"E:\FAU master\Master Thesis\Data\climate data\kerman.xlsx"
+in_file = r"E:\FAU master\Master Thesis\Data\climate data\Baft_clim.xlsx"
+#out_dir = r"E:\FAU master\Master Thesis\Plots"
+out_dir = r"E:\FAU master\Master Thesis\Results"
 os.makedirs(out_dir, exist_ok=True)
 
 # -----------------------------
@@ -73,8 +75,8 @@ plot_specs = [
     ("Precip",  "Annual mean Precip",            "Precip (mean)",        "climate_Precip_means.png",   "blue"),
     ("RH",      "Annual mean RH",                "RH (%)",               "climate_RH_means.png",       "green"),
     ("VPD",     "Annual mean VPD",               "VPD",                  "climate_VPD_means.png",      "purple"),
-    ("es",      "Annual mean es",                "es",                   "climate_es_means.png",       "brown"),
-    ("ea",      "Annual mean ea",                "ea",                   "climate_ea_means.png",       "gray"),
+    # ("es",      "Annual mean es",                "es",                   "climate_es_means.png",       "brown"),
+    # ("ea",      "Annual mean ea",                "ea",                   "climate_ea_means.png",       "gray"),
     ("T_Delta", "Annual mean (T_Max − T_Min)",   "T_Max − T_Min (°C)",   "climate_TmaxTmin_means.png", "orange"),
 ]
 
@@ -131,7 +133,7 @@ legend_ax.legend(
     fontsize=14
 )
 
-fig.suptitle("Kerman climate: yearly means (over months) – 1974–2023", y=0.995, fontsize=16)
+fig.suptitle("Baft climate: yearly means (over months) – 1974–2023", y=0.995, fontsize=16)
 fig.tight_layout(rect=[0, 0, 1, 0.98])
 
 combined_path = os.path.join(out_dir, "climate_all_variables_yearly_means_subplots.png")

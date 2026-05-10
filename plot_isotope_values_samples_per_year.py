@@ -6,13 +6,21 @@ from matplotlib.lines import Line2D
 # -----------------------------
 # Inputs
 # -----------------------------
-files = {
-    "d18o": r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted_corrected_narrow_next_year.xlsx",
-    "amount": r"E:\FAU master\Master Thesis\Data\amount_per_sample_sorted_corrected.xlsx",
-    "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
+# files = {
+#     "d18o": r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted_corrected_narrow_next_year.xlsx",
+#     "amount": r"E:\FAU master\Master Thesis\Data\amount_per_sample_sorted_corrected.xlsx",
+#     "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
+# }
+
+data_files = {
+    "d18o": r"E:\FAU master\Master Thesis\Data\d18o Data\d18o_per_sample_sorted_cleaned.xlsx",
+    "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\d18o Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
+    "amount": r"E:\FAU master\Master Thesis\Data\d18o Data\amount_per_sample_sorted_corrected.xlsx",
+
 }
 
-out_dir = r"E:\FAU master\Master Thesis\Plots"
+#out_dir = r"E:\FAU master\Master Thesis\Plots"
+out_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed"
 os.makedirs(out_dir, exist_ok=True)
 
 samples = ["HNC_24a", "HNC_25a", "HNC_28a", "HNC_53a", "HNC_58b"]
@@ -166,5 +174,5 @@ def plot_variable(excel_path: str, key: str) -> None:
 # -----------------------------
 # Generate all plots
 # -----------------------------
-for key, path in files.items():
+for key, path in data_files.items():
     plot_variable(path, key)

@@ -5,17 +5,26 @@ import matplotlib.pyplot as plt
 # -----------------------------
 # Paths (Windows)
 # -----------------------------
+# data_files = {
+#     "d18o": r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted_corrected_narrow_next_year.xlsx",
+#     "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
+#     "amount": r"E:\FAU master\Master Thesis\Data\amount_per_sample_sorted_corrected.xlsx",
+# }
+
 data_files = {
-    "d18o": r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted_corrected_narrow_next_year.xlsx",
-    "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
-    "amount": r"E:\FAU master\Master Thesis\Data\amount_per_sample_sorted_corrected.xlsx",
+    "d18o": r"E:\FAU master\Master Thesis\Data\d18o Data\d18o_per_sample_sorted_cleaned.xlsx",
+    "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\d18o Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
+    "amount": r"E:\FAU master\Master Thesis\Data\d18o Data\amount_per_sample_sorted_corrected.xlsx",
+
 }
 
-output_dir = r"E:\FAU master\Master Thesis\Plots"
+#output_dir = r"E:\FAU master\Master Thesis\Plots"
+output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed"
 os.makedirs(output_dir, exist_ok=True)
 
 # Where to save statistics
-stats_output_dir = r"E:\FAU master\Master Thesis\Data"
+#stats_output_dir = r"E:\FAU master\Master Thesis\Data"
+stats_output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed"
 os.makedirs(stats_output_dir, exist_ok=True)
 
 # -----------------------------
