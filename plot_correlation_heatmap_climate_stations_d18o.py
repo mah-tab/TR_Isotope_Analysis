@@ -28,36 +28,57 @@ import matplotlib.pyplot as plt
 # ----------------------------
 # CONFIG
 # ----------------------------
-INPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Previous Year taken"   # root only
-OUTPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow Previous Year taken"
-OUTPUT_NAME = "heatmap_station_correlations_KENDALL.png" # -> change based on correlation type
+INPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow missing removed\TRW climate correlation\python outputs"   # root only
+OUTPUT_DIR = r"E:\FAU master\Master Thesis\Correlation\Correlation outputs\Narrow missing removed\TRW climate correlation\python outputs"
+OUTPUT_NAME = "heatmap_station_correlations_SPEARMAN.png" # -> change based on correlation type
 
 # Which rows to read (Pearson only) -> change [pearson, spearman, kendall]
-ROW_METRIC = "maximal_calculated_metric_kendall"
-ROW_WINDOW = "optimal_time_window_kendall"
+ROW_METRIC = "maximal_calculated_metric_spearman"
+ROW_WINDOW = "optimal_time_window_spearman"
 
 # Desired Y-axis order from BOTTOM -> TOP
 INCLUDE_PARAMS = ["T_Mean", "T_Min", "T_Max", "Precip", "RH", "VPD"]
 
 # Station display-name mapping (x-axis only) + desired order (dict order matters in Python 3.7+)
+# STATION_DISPLAY = {
+#     "anar": "Anar(1986-2023)",
+#     "Baft": "Baft(1989-2023)",
+#     "Bam_1980": "Bam(1980-2023)",
+#     "Bam_clim": "Bam(1974-2023)",
+#     "Kerman - 1969": "Kerman(wo ea es 1974-2023)",  # DROP
+#     "kerman": "Kerman(1974-2023)",
+#     "kerman_1980": "Kerman(1980-2023)",
+#     "jiroft_clim": "Jiroft(1990-2023)",
+#     "rafsanjan_clim": "Rafsanjan(1993-2023)",
+#     "shahrebabak_clim": "Shahrebabak(1987-2023)",
+#     "sirjan_clim": "Sirjan(1985-2023)",
+#     "jiroft+Baft_clim": "Jiroft+Baft(1989-2023)",
+#     "jiroft+Baft": "Jiroft+Baft(wo some rows1989-2023)",  # DROP
+# }
+
+#for TRW files ==================================================
 STATION_DISPLAY = {
-    "anar": "Anar(1986-2023)",
-    "Baft": "Baft(1989-2023)",
-    "Bam_1980": "Bam(1980-2023)",
-    "Bam_clim": "Bam(1974-2023)",
-    "Kerman - 1969": "Kerman(wo ea es 1974-2023)",  # DROP
-    "kerman": "Kerman(1974-2023)",
-    "kerman_1980": "Kerman(1980-2023)",
-    "jiroft_clim": "Jiroft(1990-2023)",
-    "rafsanjan_clim": "Rafsanjan(1993-2023)",
-    "shahrebabak_clim": "Shahrebabak(1987-2023)",
-    "sirjan_clim": "Sirjan(1985-2023)",
-    "jiroft+Baft_clim": "Jiroft+Baft(1989-2023)",
-    "jiroft+Baft": "Jiroft+Baft(wo some rows1989-2023)",  # DROP
+    "anar_TRW": "Anar(1986-2023)",
+    "Baft_TRW": "Baft(1989-2023)",
+    "Bam_1980_TRW": "Bam(1980-2023)",
+    "Bam_clim_TRW": "Bam(1974-2023)",
+    "Kerman - 1969_TRW": "Kerman(wo ea es 1974-2023)",  # DROP
+    "kerman_TRW": "Kerman(1974-2023)",
+    "kerman_1980_TRW": "Kerman(1980-2023)",
+    "jiroft_clim_TRW": "Jiroft(1990-2023)",
+    "rafsanjan_clim_TRW": "Rafsanjan(1993-2023)",
+    "shahrebabak_clim_TRW": "Shahrebabak(1987-2023)",
+    "sirjan_clim_TRW": "Sirjan(1985-2023)",
+    "jiroft+Baft_clim_TRW": "Jiroft+Baft(1989-2023)",
+    "jiroft+Baft_TRW": "Jiroft+Baft(wo some rows1989-2023)",  # DROP
 }
 
+
 # Stations to completely ignore/remove (from all excel files + plot)
-DROP_STATIONS = {"Kerman - 1969", "jiroft+Baft"}
+#DROP_STATIONS = {"Kerman - 1969", "jiroft+Baft"}
+
+# FOR TRW: Stations to completely ignore/remove (from all excel files + plot)
+DROP_STATIONS = {"Kerman - 1969_TRW", "jiroft+Baft_TRW"}
 
 # Plot settings (bigger fonts)
 FIG_W = 20
@@ -246,13 +267,13 @@ def main():
     )
 
     plt.title(
-        "Kendall: maximal correlation (r) + optimal time window",
+        "Spearman: maximal correlation (r) + optimal time window",
         fontsize=TITLE_FONTSIZE,
         fontweight="bold"
     )
 
     cbar = plt.colorbar(im, fraction=0.03, pad=0.02)
-    cbar.set_label("Kendall r (maximal_calculated_metric)", fontsize=CBAR_FONTSIZE, fontweight="bold")
+    cbar.set_label("Spearman r (maximal_calculated_metric)", fontsize=CBAR_FONTSIZE, fontweight="bold")
     cbar.ax.tick_params(labelsize=CBAR_FONTSIZE)
 
     # Cell gridlines
