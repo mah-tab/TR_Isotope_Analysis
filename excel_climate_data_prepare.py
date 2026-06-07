@@ -12,6 +12,11 @@ in_dir = r"E:\FAU master\Master Thesis\All files and Data\kerman climate- r form
 out_dir = r"E:\FAU master\Master Thesis\Data\climate data"
 os.makedirs(out_dir, exist_ok=True)
 
+# Additional SPEI climate file
+spei_file = r"E:\FAU master\Master Thesis\Data\d18o Data\new\Baft-clim_with_SPEIS.csv"
+spei_out_dir = r"E:\FAU master\Master Thesis\Data\d18o Data\new"
+os.makedirs(spei_out_dir, exist_ok=True)
+
 YEAR_MIN, YEAR_MAX = 1974, 2023
 columns_order = ["Year", "Month", "T_Mean", "T_Max", "T_Min", "Precip", "RH", "VPD", "es", "ea"]
 
@@ -109,3 +114,47 @@ for p in paths:
 
     except Exception as e:
         print(f"[FAILED] {p}\n  Reason: {e}\n")
+
+
+# ---------------------------------------
+# Additionally process SPEI climate file
+# ---------------------------------------
+try:
+    spei_df = read_table_any_format(spei_file)
+
+    # Clean column names
+    spei_df.columns = [str(c).strip() for c in spei_df.columns]
+
+    # Drop any unnamed/empty columns, e.g. row index column from R
+    spei_df = spei_df.loc[:, ~spei_df.columns.str.contains(r"^Unnamed", na=False)]
+    spei_df = spei_df.loc[:, spei_df.columns != ""]
+
+    # Convert Year/Month
+    spei_df["Year"] = pd.to_numeric(spei_df["Year"], errors="coerce")
+    spei_df["Month"] = pd.to_numeric(spei_df["Month"], errors="coerce")
+
+    # Filter years 1974..2023
+    spei_df = spei_df[
+        (spei_df["Year"] >= YEAR_MIN) &
+        (spei_df["Year"] <= YEAR_MAX)
+    ].copy()
+
+    # Convert all columns except Year/Month to numeric
+    spei_value_cols = [c for c in spei_df.columns if c not in ("Year", "Month")]
+
+    for c in spei_value_cols:
+        spei_df[c] = to_numeric_comma_decimal(spei_df[c])
+
+    # Sort
+    spei_df = spei_df.sort_values(["Year", "Month"]).reset_index(drop=True)
+
+    # Save as Excel in the same folder as the SPEI CSV
+    spei_base = os.path.splitext(os.path.basename(spei_file))[0]
+    spei_out_path = os.path.join(spei_out_dir, f"{spei_base}.xlsx")
+
+    spei_df.to_excel(spei_out_path, index=False)
+
+    print(f"Saved SPEI climate file: {spei_out_path}")
+
+except Exception as e:
+    print(f"[FAILED] {spei_file}\n  Reason: {e}\n")
