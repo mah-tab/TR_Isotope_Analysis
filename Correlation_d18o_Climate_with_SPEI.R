@@ -34,6 +34,14 @@ COR_SCALE_MIN <- -0.75
 COR_SCALE_MAX <-  0.75
 COR_SCALE_BREAKS <- c(-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75)
 
+# Font sizes for all plots
+TITLE_FONTSIZE <- 20
+SUBTITLE_FONTSIZE <- 16
+AXIS_TITLE_FONTSIZE <- 16
+AXIS_TICK_FONTSIZE <- 14
+LEGEND_TITLE_FONTSIZE <- 14
+LEGEND_TEXT_FONTSIZE <- 13
+
 # Spearman only for now
 cor_methods <- c("spearman")
 
@@ -423,11 +431,37 @@ save_custom_heatmap <- function(res_obj, prefix, out_dir, approach, variable, co
       plot.background = element_rect(fill = "white", color = NA),
       legend.background = element_rect(fill = "white", color = NA),
       panel.grid = element_blank(),
-      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-      axis.title = element_text(size = 15),
-      plot.title = element_text(size = 16, face = "bold"),
-      legend.title = element_text(size = 12),
-      legend.text = element_text(size = 11)
+      axis.text.x = element_text(
+        angle = 90,
+        vjust = 0.5,
+        hjust = 1,
+        size = AXIS_TICK_FONTSIZE
+      ),
+      axis.text.y = element_text(
+        size = AXIS_TICK_FONTSIZE
+      ),
+      axis.title.x = element_text(
+        size = AXIS_TITLE_FONTSIZE,
+        face = "bold"
+      ),
+      axis.title.y = element_text(
+        size = AXIS_TITLE_FONTSIZE,
+        face = "bold"
+      ),
+      plot.title = element_text(
+        size = TITLE_FONTSIZE,
+        face = "bold"
+      ),
+      plot.subtitle = element_text(
+        size = SUBTITLE_FONTSIZE
+      ),
+      legend.title = element_text(
+        size = LEGEND_TITLE_FONTSIZE,
+        face = "bold"
+      ),
+      legend.text = element_text(
+        size = LEGEND_TEXT_FONTSIZE
+      )
     )
   
   ggsave(
@@ -532,11 +566,37 @@ save_custom_type2_barplot <- function(pvalue_df, prefix, out_dir, approach, vari
       plot.background = element_rect(fill = "white", color = NA),
       legend.background = element_rect(fill = "white", color = NA),
       panel.grid.major.x = element_blank(),
-      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-      axis.title = element_text(size = 15),
-      plot.title = element_text(size = 16, face = "bold"),
-      legend.title = element_text(size = 12),
-      legend.text = element_text(size = 11)
+      axis.text.x = element_text(
+        angle = 90,
+        vjust = 0.5,
+        hjust = 1,
+        size = AXIS_TICK_FONTSIZE
+      ),
+      axis.text.y = element_text(
+        size = AXIS_TICK_FONTSIZE
+      ),
+      axis.title.x = element_text(
+        size = AXIS_TITLE_FONTSIZE,
+        face = "bold"
+      ),
+      axis.title.y = element_text(
+        size = AXIS_TITLE_FONTSIZE,
+        face = "bold"
+      ),
+      plot.title = element_text(
+        size = TITLE_FONTSIZE,
+        face = "bold"
+      ),
+      plot.subtitle = element_text(
+        size = SUBTITLE_FONTSIZE
+      ),
+      legend.title = element_text(
+        size = LEGEND_TITLE_FONTSIZE,
+        face = "bold"
+      ),
+      legend.text = element_text(
+        size = LEGEND_TEXT_FONTSIZE
+      )
     )
   
   ggsave(
