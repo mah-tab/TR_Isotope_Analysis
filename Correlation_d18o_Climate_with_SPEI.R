@@ -843,4 +843,3 @@ cat("1) ALL_correlation_windows_with_pvalues.csv\n")
 cat("2) ALL_significant_results_p_lt_0.05.csv\n")
 cat("3) ALL_significant_results_p_lt_0.01.csv\n")
 cat("4) ALL_best_window_per_variable_and_approach.csv\n")
-
