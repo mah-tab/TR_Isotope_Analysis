@@ -7,10 +7,12 @@
 # install.packages("dendroTools")
 # install.packages("readxl")
 # install.packages("ggplot2")
+# install.packages("scales")
 
 library(dendroTools)
 library(ggplot2)
 library(readxl)
+library(scales)
 
 # -----------------------------
 # Paths
@@ -26,6 +28,11 @@ dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 # -----------------------------
 START_YEAR <- 1989
 END_YEAR   <- 2023
+
+# Fixed color and y-axis scale for correlation plots
+COR_SCALE_MIN <- -0.75
+COR_SCALE_MAX <-  0.75
+COR_SCALE_BREAKS <- c(-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75)
 
 # Spearman only for now
 cor_methods <- c("spearman")
@@ -363,7 +370,7 @@ critical_r <- function(n, alpha) {
 # -----------------------------
 # Helper: custom heatmap
 # negative = blue, zero = white, positive = red
-# fixed legend from -1 to 1
+# fixed legend from -0.75 to 0.75
 # -----------------------------
 save_custom_heatmap <- function(res_obj, prefix, out_dir, approach, variable, cor_method) {
   
@@ -399,8 +406,9 @@ save_custom_heatmap <- function(res_obj, prefix, out_dir, approach, variable, co
       mid = "white",
       high = "#B2182B",
       midpoint = 0,
-      limits = c(-1, 1),
-      breaks = c(-1, -0.5, 0, 0.5, 1),
+      limits = c(COR_SCALE_MIN, COR_SCALE_MAX),
+      breaks = COR_SCALE_BREAKS,
+      oob = scales::squish,
       name = "Correlation\ncoefficient"
     ) +
     labs(
@@ -438,6 +446,7 @@ save_custom_heatmap <- function(res_obj, prefix, out_dir, approach, variable, co
 # Helper: custom type-2 bar plot
 # y-axis = correlation coefficient
 # dashed blue/red lines = correlation thresholds for p < 0.05 / p < 0.01
+# y-axis fixed from -0.75 to 0.75
 # -----------------------------
 save_custom_type2_barplot <- function(pvalue_df, prefix, out_dir, approach, variable, cor_method) {
   
@@ -482,8 +491,9 @@ save_custom_type2_barplot <- function(pvalue_df, prefix, out_dir, approach, vari
       mid = "white",
       high = "#B2182B",
       midpoint = 0,
-      limits = c(-1, 1),
-      breaks = c(-1, -0.5, 0, 0.5, 1),
+      limits = c(COR_SCALE_MIN, COR_SCALE_MAX),
+      breaks = COR_SCALE_BREAKS,
+      oob = scales::squish,
       name = "Correlation\ncoefficient"
     ) +
     geom_hline(
@@ -512,7 +522,10 @@ save_custom_type2_barplot <- function(pvalue_df, prefix, out_dir, approach, vari
       x = "Starting month of calculation, including previous year",
       y = "Correlation coefficient"
     ) +
-    coord_cartesian(ylim = c(-1, 1)) +
+    scale_y_continuous(
+      limits = c(COR_SCALE_MIN, COR_SCALE_MAX),
+      breaks = COR_SCALE_BREAKS
+    ) +
     theme_minimal(base_size = 14) +
     theme(
       panel.background = element_rect(fill = "white", color = NA),
@@ -770,3 +783,4 @@ cat("1) ALL_correlation_windows_with_pvalues.csv\n")
 cat("2) ALL_significant_results_p_lt_0.05.csv\n")
 cat("3) ALL_significant_results_p_lt_0.01.csv\n")
 cat("4) ALL_best_window_per_variable_and_approach.csv\n")
+
