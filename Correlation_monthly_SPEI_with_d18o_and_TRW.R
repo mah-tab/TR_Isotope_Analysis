@@ -22,8 +22,8 @@ trw_path  <- "E:/FAU master/Master Thesis/Data/Tree Ring Width Chronology/TRW_ch
 
 climate_path <- "E:/FAU master/Master Thesis/Data/d18o Data/new/Baft-clim_with_SPEIS.xlsx"
 
-out_dir_d18o <- "E:/FAU master/Master Thesis/Results/d18o Baft correlation/SPEI_monthly_heatmap"
-out_dir_trw  <- "E:/FAU master/Master Thesis/Results/TRW Baft correlation/SPEI_monthly_heatmap"
+out_dir_d18o <- "E:/FAU master/Master Thesis/Results/d18o Baft correlation/SPEI_monthly_heatmap/kendall"
+out_dir_trw  <- "E:/FAU master/Master Thesis/Results/TRW Baft correlation/SPEI_monthly_heatmap/kendall"
 
 dir.create(out_dir_d18o, showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir_trw, showWarnings = FALSE, recursive = TRUE)
@@ -34,7 +34,7 @@ dir.create(out_dir_trw, showWarnings = FALSE, recursive = TRUE)
 START_YEAR <- 1989
 END_YEAR   <- 2023
 
-cor_method <- "spearman"
+cor_method <- "kendall"
 
 SPEI_vars <- paste0("SPEI", 1:10)
 
