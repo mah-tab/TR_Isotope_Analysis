@@ -33,7 +33,7 @@ import statsmodels.api as sm
 # ------------------------------------------------------------
 #OUT_DIR = r"E:\FAU master\Master Thesis\R Python outputs"
 #OUT_DIR = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed"
-OUT_DIR = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed\new_raw_final"
+OUT_DIR = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed\new_raw_final\font_corrected"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 # UPDATED: read from Excel instead of CSV
@@ -75,6 +75,7 @@ def fit_linear_trend(year: pd.Series, y: pd.Series):
     se = model.bse.get("Year", np.nan)
     tval = model.tvalues.get("Year", np.nan)
     pval = model.pvalues.get("Year", np.nan)
+
     return float(slope), float(se), float(tval), float(pval)
 
 
@@ -88,8 +89,10 @@ def per_series_dplr_equivalent_stats(df_year_indexed: pd.DataFrame) -> pd.DataFr
     n_total = len(years)
 
     rows = []
+
     for col in df_year_indexed.columns:
         s = pd.to_numeric(df_year_indexed[col], errors="coerce")
+
         n_obs = int(s.notna().sum())
         n_missing = int(s.isna().sum())
 
@@ -99,6 +102,7 @@ def per_series_dplr_equivalent_stats(df_year_indexed: pd.DataFrame) -> pd.DataFr
             last_year = int(valid_years.max())
 
             desc = s.describe(percentiles=[0.25, 0.5, 0.75])
+
             row = {
                 "Series": col,
                 "n_total_years": n_total,
@@ -115,12 +119,13 @@ def per_series_dplr_equivalent_stats(df_year_indexed: pd.DataFrame) -> pd.DataFr
                 "Q3": float(desc["75%"]),
                 "max": float(desc["max"]),
             }
+
         else:
             row = {
                 "Series": col,
                 "n_total_years": n_total,
                 "n_obs": 0,
-                "n_missing": n_total,
+                "n_missing": n_missing,
                 "missing_pct": 100.0,
                 "first_year": np.nan,
                 "last_year": np.nan,
@@ -140,23 +145,68 @@ def per_series_dplr_equivalent_stats(df_year_indexed: pd.DataFrame) -> pd.DataFr
 
 def save_corr_heatmap(corr: pd.DataFrame, out_png: str, title: str) -> None:
     """Plot and save correlation matrix heatmap."""
-    fig, ax = plt.subplots(figsize=(7, 6))
+    fig, ax = plt.subplots(figsize=(8, 7))
     im = ax.imshow(corr.values, aspect="equal")
 
     ax.set_xticks(range(len(corr.columns)))
     ax.set_yticks(range(len(corr.index)))
-    ax.set_xticklabels(corr.columns, rotation=45, ha="right")
-    ax.set_yticklabels(corr.index)
+
+    ax.set_xticklabels(
+        corr.columns,
+        rotation=45,
+        ha="right",
+        fontsize=14
+    )
+
+    ax.set_yticklabels(
+        corr.index,
+        fontsize=14
+    )
 
     # annotate correlation values
     for i in range(corr.shape[0]):
+
+        # Find highest correlation for this sample,
+        # excluding its self-correlation (1.00 on diagonal)
+        row_values = corr.iloc[i].copy()
+
+        if corr.index[i] in row_values.index:
+            row_values.loc[corr.index[i]] = np.nan
+
+        row_max = row_values.max(skipna=True)
+
         for j in range(corr.shape[1]):
             val = corr.iloc[i, j]
             txt = "NA" if pd.isna(val) else f"{val:.2f}"
-            ax.text(j, i, txt, ha="center", va="center", fontsize=9)
 
-    ax.set_title(title)
-    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+            # White text on darker cells, black text on lighter cells
+            text_color = "white" if (
+                not pd.isna(val) and val < 0.50
+            ) else "black"
+
+            # Bold the highest non-diagonal correlation in each row
+            text_weight = "bold" if (
+                not pd.isna(val)
+                and not pd.isna(row_max)
+                and np.isclose(val, row_max)
+            ) else "normal"
+
+            ax.text(
+                j, i, txt,
+                ha="center",
+                va="center",
+                fontsize=14,
+                color=text_color,
+                fontweight=text_weight
+            )
+
+    ax.set_title(
+        title,
+        fontsize=16
+    )
+
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.ax.tick_params(labelsize=13)
 
     plt.tight_layout()
     fig.savefig(out_png, dpi=DPI, bbox_inches="tight")
@@ -173,11 +223,16 @@ if "Year" not in df.columns:
     raise ValueError(f"'Year' column not found. Columns: {list(df.columns)}")
 
 missing_samples = [c for c in SAMPLES if c not in df.columns]
+
 if missing_samples:
-    raise ValueError(f"Missing expected sample columns: {missing_samples}. Found: {list(df.columns)}")
+    raise ValueError(
+        f"Missing expected sample columns: {missing_samples}. "
+        f"Found: {list(df.columns)}"
+    )
 
 # Ensure numeric dtypes
 df["Year"] = pd.to_numeric(df["Year"], errors="coerce").astype("Int64")
+
 for c in SAMPLES:
     df[c] = pd.to_numeric(df[c], errors="coerce")
 
@@ -186,54 +241,121 @@ df = df.sort_values("Year").reset_index(drop=True)
 
 print("\n--- Data info ---")
 print(df.info())
+
 print("\n--- Data summary ---")
-print(df.describe(include="all"))
+
+# Store the printed summary so it can also be saved to Excel
+data_summary = df.describe(include="all")
+
+print(data_summary)
+
 
 # ------------------------------------------------------------
 # 1) SELECT SERIES
 # ------------------------------------------------------------
 A_data = df[["Year"] + SAMPLES].copy()
 
+
 # ------------------------------------------------------------
 # 2) INTER-SERIES CORRELATIONS (pairwise complete)
 # ------------------------------------------------------------
-corr = A_data[SAMPLES].corr(method="pearson", min_periods=2)
+corr = A_data[SAMPLES].corr(
+    method="pearson",
+    min_periods=2
+)
+
 mean_corr = mean_interseries_correlation(corr)
 
 print("\nCorrelation matrix:\n", corr)
-print(f"\nMean inter-series correlation (upper triangle): {mean_corr:.3f}")
+print(
+    f"\nMean inter-series correlation (upper triangle): "
+    f"{mean_corr:.3f}"
+)
 
-corr_png = os.path.join(OUT_DIR, "correlation_matrix_A_heatmap.png")
-save_corr_heatmap(corr, corr_png, "Inter-series correlation matrix – Site A (δ18O)")
+corr_png = os.path.join(
+    OUT_DIR,
+    "correlation_matrix_A_heatmap.png"
+)
+
+save_corr_heatmap(
+    corr,
+    corr_png,
+    "δ18O Inter-series Correlation Matrix"
+)
+
 print(f"Saved: {corr_png}")
+
 
 # ------------------------------------------------------------
 # 3) MEAN δ18O CHRONOLOGY
 # ------------------------------------------------------------
-df["mean_d18O"] = df[SAMPLES].mean(axis=1, skipna=True)
+df["mean_d18O"] = df[SAMPLES].mean(
+    axis=1,
+    skipna=True
+)
+
 A_mean = df[["Year", "mean_d18O"]].copy()
 
-mean_png = os.path.join(OUT_DIR, "mean_d18O_chronology_siteA.png")
+mean_png = os.path.join(
+    OUT_DIR,
+    "mean_d18O_chronology_siteA.png"
+)
+
 plt.figure(figsize=(10, 5))
-plt.plot(A_mean["Year"], A_mean["mean_d18O"], marker="o", linestyle="-")
-plt.title("Mean δ18O chronology – Site A")
+
+plt.plot(
+    A_mean["Year"],
+    A_mean["mean_d18O"],
+    marker="o",
+    linestyle="-"
+)
+
+plt.title("Mean δ18O chronology")
 plt.xlabel("Year")
 plt.ylabel("δ$^{18}$O (‰)")
 plt.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig(mean_png, dpi=DPI, bbox_inches="tight")
+
+plt.savefig(
+    mean_png,
+    dpi=DPI,
+    bbox_inches="tight"
+)
+
 plt.close()
+
 print(f"Saved: {mean_png}")
+
 
 # ------------------------------------------------------------
 # 4) dplR-EQUIVALENT STATS (Python)
 # ------------------------------------------------------------
-rwl_like = df[["Year"] + SAMPLES].dropna(subset=["Year"]).set_index("Year")
-series_stats = per_series_dplr_equivalent_stats(rwl_like)
+rwl_like = (
+    df[["Year"] + SAMPLES]
+    .dropna(subset=["Year"])
+    .set_index("Year")
+)
 
-mean_desc = df["mean_d18O"].describe(percentiles=[0.25, 0.5, 0.75])
+series_stats = per_series_dplr_equivalent_stats(
+    rwl_like
+)
+
+mean_desc = df["mean_d18O"].describe(
+    percentiles=[0.25, 0.5, 0.75]
+)
+
 mean_stats = pd.DataFrame({
-    "metric": ["count", "mean", "std", "min", "Q1", "median", "Q3", "max"],
+    "metric": [
+        "count",
+        "mean",
+        "std",
+        "min",
+        "Q1",
+        "median",
+        "Q3",
+        "max"
+    ],
+
     "value": [
         float(mean_desc["count"]),
         float(mean_desc["mean"]),
@@ -247,34 +369,68 @@ mean_stats = pd.DataFrame({
 })
 
 # Diagnostic distribution plot
-box_png = os.path.join(OUT_DIR, "d18O_distributions_boxplot_siteA.png")
+box_png = os.path.join(
+    OUT_DIR,
+    "d18O_distributions_boxplot_siteA.png"
+)
+
 plt.figure(figsize=(10, 5))
-plt.boxplot([df[s].dropna().values for s in SAMPLES], labels=SAMPLES, vert=True, showfliers=True)
-plt.title("δ18O distributions per series – Site A")
+
+plt.boxplot(
+    [df[s].dropna().values for s in SAMPLES],
+    labels=SAMPLES,
+    vert=True,
+    showfliers=True
+)
+
+plt.title("δ18O distributions per series")
 plt.xlabel("Series")
 plt.ylabel("δ$^{18}$O (‰)")
 plt.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig(box_png, dpi=DPI, bbox_inches="tight")
+
+plt.savefig(
+    box_png,
+    dpi=DPI,
+    bbox_inches="tight"
+)
+
 plt.close()
+
 print(f"Saved: {box_png}")
+
 
 # ------------------------------------------------------------
 # 5) OVERALL MEAN δ18O VALUE
 # ------------------------------------------------------------
-overall_mean = float(df["mean_d18O"].mean(skipna=True))
-print(f"\nOverall mean δ18O (Site A): {overall_mean:.2f} ‰")
+overall_mean = float(
+    df["mean_d18O"].mean(skipna=True)
+)
+
+print(
+    f"\nOverall mean δ18O (Site A): "
+    f"{overall_mean:.2f} ‰"
+)
+
 
 # ------------------------------------------------------------
 # 6) LINEAR TREND ANALYSIS (d18O ~ Year)
 # ------------------------------------------------------------
+
 A_long = df[["Year"] + SAMPLES + ["mean_d18O"]].melt(
-    id_vars=["Year"], var_name="Series", value_name="d18O"
+    id_vars=["Year"],
+    var_name="Series",
+    value_name="d18O"
 )
 
 trend_rows = []
+
 for series_name, sub in A_long.groupby("Series"):
-    slope, se, tval, pval = fit_linear_trend(sub["Year"], sub["d18O"])
+    slope, se, tval, pval = fit_linear_trend(
+        sub["Year"],
+        sub["d18O"]
+    )
+
     trend_rows.append({
         "Series": series_name,
         "slope": slope,
@@ -285,62 +441,205 @@ for series_name, sub in A_long.groupby("Series"):
 
 trend_df = pd.DataFrame(trend_rows)
 
-trend_png = os.path.join(OUT_DIR, "d18O_trends_siteA_facets.png")
+trend_png = os.path.join(
+    OUT_DIR,
+    "d18O_trends_siteA_facets.png"
+)
 
 series_order = list(trend_df["Series"])
+
 n = len(series_order)
 ncols = 3
 nrows = int(np.ceil(n / ncols))
 
-fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 4 * nrows))
+fig, axes = plt.subplots(
+    nrows=nrows,
+    ncols=ncols,
+    figsize=(14, 4 * nrows)
+)
+
 axes = np.array(axes).reshape(-1)
 
 for i, sname in enumerate(series_order):
     ax = axes[i]
-    sub = A_long[A_long["Series"] == sname].dropna(subset=["Year", "d18O"])
-    ax.scatter(sub["Year"], sub["d18O"], alpha=0.4)
+
+    sub = A_long[
+        A_long["Series"] == sname
+    ].dropna(
+        subset=["Year", "d18O"]
+    )
+
+    ax.scatter(
+        sub["Year"],
+        sub["d18O"],
+        alpha=0.4
+    )
 
     if len(sub) >= 3:
         x = sub["Year"].astype(float).values
         y = sub["d18O"].astype(float).values
-        model = sm.OLS(y, sm.add_constant(x)).fit()
-        xline = np.linspace(x.min(), x.max(), 100)
-        yline = model.predict(sm.add_constant(xline))
-        ax.plot(xline, yline)
 
-    ax.set_title(sname)
-    ax.set_xlabel("Year")
-    ax.set_ylabel("δ$^{18}$O (‰)")
+        model = sm.OLS(
+            y,
+            sm.add_constant(x)
+        ).fit()
+
+        xline = np.linspace(
+            x.min(),
+            x.max(),
+            100
+        )
+
+        yline = model.predict(
+            sm.add_constant(xline)
+        )
+
+    #     ax.plot(
+    #         xline,
+    #         yline
+    #     )
+    #
+    # ax.set_title(
+    #     sname,
+    #     fontsize=16
+    # )
+    #
+    # ax.set_xlabel(
+    #     "Year",
+    #     fontsize=16
+    # )
+    #
+    # ax.set_ylabel(
+    #     "δ$^{18}$O (‰)",
+    #     fontsize=16
+    # )
+
+    ax.plot(
+        xline,
+        yline
+    )
+
+    if sname == "mean_d18O":
+        ax.set_title(
+            "mean δ¹⁸O",
+            fontsize=16,
+            fontweight="bold"
+        )
+    else:
+        ax.set_title(
+            sname,
+            fontsize=16
+        )
+
+    ax.set_xlabel(
+        "Year",
+        fontsize=16
+    )
+
+    ax.set_ylabel(
+        "δ$^{18}$O (‰)",
+        fontsize=16
+    )
+
+    ax.tick_params(
+        axis="both",
+        labelsize=14
+    )
+
     ax.grid(alpha=0.3)
 
 for j in range(i + 1, len(axes)):
     axes[j].axis("off")
 
-fig.suptitle("Linear trends in δ18O – Site A", y=1.02, fontsize=14)
+fig.suptitle(
+    "Linear trends in δ18O per Sample",
+    y=1.02,
+    fontsize=18
+)
+
 fig.tight_layout()
-fig.savefig(trend_png, dpi=DPI, bbox_inches="tight")
+
+fig.savefig(
+    trend_png,
+    dpi=DPI,
+    bbox_inches="tight"
+)
+
 plt.close(fig)
+
 print(f"Saved: {trend_png}")
+
 
 # ------------------------------------------------------------
 # 7) SAVE MEAN CHRONOLOGY (CSV-like equivalent, but as XLSX too)
 # ------------------------------------------------------------
-mean_out_csv = os.path.join(OUT_DIR, "iso_mean_chronology_siteA.csv")
-A_mean.to_csv(mean_out_csv, index=False)
+mean_out_csv = os.path.join(
+    OUT_DIR,
+    "iso_mean_chronology_siteA.csv"
+)
+
+A_mean.to_csv(
+    mean_out_csv,
+    index=False
+)
+
 print(f"Saved: {mean_out_csv}")
+
 
 # ------------------------------------------------------------
 # SAVE EVERYTHING AS XLSX (single workbook)
 # ------------------------------------------------------------
-xlsx_out = os.path.join(OUT_DIR, "isotope_siteA_outputs.xlsx")
-with pd.ExcelWriter(xlsx_out, engine="openpyxl") as writer:
-    df.to_excel(writer, sheet_name="data_with_mean", index=False)
-    corr.to_excel(writer, sheet_name="correlation_matrix")
-    pd.DataFrame({"mean_interseries_corr": [mean_corr]}).to_excel(
-        writer, sheet_name="correlation_summary", index=False
+xlsx_out = os.path.join(
+    OUT_DIR,
+    "isotope_siteA_outputs.xlsx"
+)
+
+with pd.ExcelWriter(
+    xlsx_out,
+    engine="openpyxl"
+) as writer:
+
+    df.to_excel(
+        writer,
+        sheet_name="data_with_mean",
+        index=False
     )
-    series_stats.to_excel(writer, sheet_name="dplr_equiv_series_stats", index=False)
-    mean_stats.to_excel(writer, sheet_name="mean_series_stats", index=False)
-    trend_df.to_excel(writer, sheet_name="trend_results", index=False)
+
+    # Save the same descriptive summary that is printed above
+    data_summary.to_excel(
+        writer,
+        sheet_name="data_summary"
+    )
+
+    corr.to_excel(
+        writer,
+        sheet_name="correlation_matrix"
+    )
+
+    pd.DataFrame({
+        "mean_interseries_corr": [mean_corr]
+    }).to_excel(
+        writer,
+        sheet_name="correlation_summary",
+        index=False
+    )
+
+    series_stats.to_excel(
+        writer,
+        sheet_name="dplr_equiv_series_stats",
+        index=False
+    )
+
+    mean_stats.to_excel(
+        writer,
+        sheet_name="mean_series_stats",
+        index=False
+    )
+
+    trend_df.to_excel(
+        writer,
+        sheet_name="trend_results",
+        index=False
+    )
 
 print(f"\nSaved Excel workbook: {xlsx_out}")

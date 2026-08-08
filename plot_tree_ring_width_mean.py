@@ -1,10 +1,10 @@
 """
 Creates FOUR plots from TRW chronology data:
 
-1) Tree-ring width per year
-2) Mean δ18O per year
-3) Tree-ring width and mean δ18O as two side-by-side subplots
-4) Tree-ring width and mean δ18O on the same plot with two y-axes
+1. Tree-ring width per year
+2. Mean δ18O per year
+3. Tree-ring width and mean δ18O as two side-by-side subplots
+4. Tree-ring width and mean δ18O on the same plot with two y-axes
 
 Input Excel structure:
 Column 1 = Year
@@ -18,13 +18,13 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 # -----------------------------
 # Input / Output paths
 # -----------------------------
+
 INPUT_XLSX = r"E:\FAU master\Master Thesis\Data\Tree Ring Width Chronology\TRW_chronology.xlsx"
 
-OUT_DIR = r"E:\FAU master\Master Thesis\Results\TRW"
+OUT_DIR = r"E:\FAU master\Master Thesis\Results\TRW\font_corrected"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 OUT_TRW = os.path.join(OUT_DIR, "tree_ring_width_per_year.png")
@@ -32,10 +32,10 @@ OUT_D18O = os.path.join(OUT_DIR, "mean_d18o_per_year.png")
 OUT_SUBPLOTS = os.path.join(OUT_DIR, "trw_and_mean_d18o_subplots.png")
 OUT_DUAL_AXIS = os.path.join(OUT_DIR, "trw_and_mean_d18o_dual_axis.png")
 
-
 # -----------------------------
 # Plot settings
 # -----------------------------
+
 TRW_COLOR = "darkgreen"
 D18O_COLOR = "deepskyblue"
 
@@ -48,8 +48,17 @@ D18O_YLABEL = "Mean δ$^{18}$O (‰)"
 DPI = 600
 
 # Font sizes
-YLABEL_FONTSIZE = 13
-YTICK_FONTSIZE = 11
+
+TITLE_FONTSIZE = 18
+SUPTITLE_FONTSIZE = 20
+
+XLABEL_FONTSIZE = 16
+YLABEL_FONTSIZE = 16
+
+XTICK_FONTSIZE = 14
+YTICK_FONTSIZE = 14
+
+LEGEND_FONTSIZE = 13
 
 
 def main():
@@ -78,11 +87,20 @@ def main():
     year_min = int(df["Year"].min())
     year_max = int(df["Year"].max())
 
-    # Used for plots 1, 2, and 4
-    xticks = list(range(year_min, year_max + 1, 3))
+    # Used for all plots:
+    # tick + label every 5 years, always including first and last year
+    xticks = list(range(year_min, year_max + 1, 5))
+
+    if year_min not in xticks:
+        xticks.append(year_min)
+
+    if year_max not in xticks:
+        xticks.append(year_max)
+
+    xticks = sorted(set(xticks))
 
     # Used only for plot 3, the side-by-side subplots
-    xticks_subplots = list(range(year_min, year_max + 1, 5))
+    xticks_subplots = xticks
 
     # ============================================================
     # PLOT 1: Tree-ring width per year
@@ -98,13 +116,34 @@ def main():
         label=TRW_LABEL
     )
 
-    plt.xlabel("Year")
-    plt.ylabel(TRW_YLABEL, fontsize=YLABEL_FONTSIZE)
-    plt.yticks(fontsize=YTICK_FONTSIZE)
-    plt.title("Tree-Ring Width per Year")
+    plt.xlabel(
+        "Year",
+        fontsize=XLABEL_FONTSIZE
+    )
+
+    plt.ylabel(
+        TRW_YLABEL,
+        fontsize=YLABEL_FONTSIZE
+    )
+
+    plt.yticks(
+        fontsize=YTICK_FONTSIZE
+    )
+
+    plt.title(
+        "Tree-Ring Width per Year",
+        fontsize=TITLE_FONTSIZE
+    )
+
     #plt.legend(loc="upper left", fontsize=9)
+
     plt.grid(True, alpha=0.3)
-    plt.xticks(xticks)
+
+    plt.xticks(
+        xticks,
+        fontsize=XTICK_FONTSIZE
+    )
+
     plt.tight_layout()
     plt.savefig(OUT_TRW, dpi=DPI)
     plt.close()
@@ -125,13 +164,34 @@ def main():
         label=D18O_LABEL
     )
 
-    plt.xlabel("Year")
-    plt.ylabel(D18O_YLABEL, fontsize=YLABEL_FONTSIZE)
-    plt.yticks(fontsize=YTICK_FONTSIZE)
-    plt.title("Mean δ$^{18}$O per Year")
+    plt.xlabel(
+        "Year",
+        fontsize=XLABEL_FONTSIZE
+    )
+
+    plt.ylabel(
+        D18O_YLABEL,
+        fontsize=YLABEL_FONTSIZE
+    )
+
+    plt.yticks(
+        fontsize=YTICK_FONTSIZE
+    )
+
+    plt.title(
+        "Mean δ$^{18}$O per Year",
+        fontsize=TITLE_FONTSIZE
+    )
+
     #plt.legend(loc="upper left", fontsize=9)
+
     plt.grid(True, alpha=0.3)
-    plt.xticks(xticks)
+
+    plt.xticks(
+        xticks,
+        fontsize=XTICK_FONTSIZE
+    )
+
     plt.tight_layout()
     plt.savefig(OUT_D18O, dpi=DPI)
     plt.close()
@@ -142,7 +202,12 @@ def main():
     # PLOT 3: TRW and mean δ18O as two subplots next to each other
     # Uses x-axis ticks every 5 years
     # ============================================================
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(16, 6), sharex=False)
+    fig, axes = plt.subplots(
+        nrows=1,
+        ncols=2,
+        figsize=(16, 6),
+        sharex=False
+    )
 
     # Left subplot: TRW
     axes[0].plot(
@@ -154,11 +219,33 @@ def main():
         label=TRW_LABEL
     )
 
-    axes[0].set_xlabel("Year")
-    axes[0].set_ylabel(TRW_YLABEL, fontsize=YLABEL_FONTSIZE)
-    axes[0].tick_params(axis="y", labelsize=YTICK_FONTSIZE)
-    axes[0].set_title("Tree-Ring Width per Year")
+    axes[0].set_xlabel(
+        "Year",
+        fontsize=XLABEL_FONTSIZE
+    )
+
+    axes[0].set_ylabel(
+        TRW_YLABEL,
+        fontsize=YLABEL_FONTSIZE
+    )
+
+    axes[0].tick_params(
+        axis="x",
+        labelsize=XTICK_FONTSIZE
+    )
+
+    axes[0].tick_params(
+        axis="y",
+        labelsize=YTICK_FONTSIZE
+    )
+
+    axes[0].set_title(
+        "Tree-Ring Width per Year",
+        fontsize=TITLE_FONTSIZE
+    )
+
     #axes[0].legend(loc="upper left", fontsize=9)
+
     axes[0].grid(True, alpha=0.3)
     axes[0].set_xticks(xticks_subplots)
 
@@ -172,15 +259,41 @@ def main():
         label=D18O_LABEL
     )
 
-    axes[1].set_xlabel("Year")
-    axes[1].set_ylabel(D18O_YLABEL, fontsize=YLABEL_FONTSIZE)
-    axes[1].tick_params(axis="y", labelsize=YTICK_FONTSIZE)
-    axes[1].set_title("Mean δ$^{18}$O per Year")
+    axes[1].set_xlabel(
+        "Year",
+        fontsize=XLABEL_FONTSIZE
+    )
+
+    axes[1].set_ylabel(
+        D18O_YLABEL,
+        fontsize=YLABEL_FONTSIZE
+    )
+
+    axes[1].tick_params(
+        axis="x",
+        labelsize=XTICK_FONTSIZE
+    )
+
+    axes[1].tick_params(
+        axis="y",
+        labelsize=YTICK_FONTSIZE
+    )
+
+    axes[1].set_title(
+        "Mean δ$^{18}$O per Year",
+        fontsize=TITLE_FONTSIZE
+    )
+
     #axes[1].legend(loc="upper left", fontsize=9)
+
     axes[1].grid(True, alpha=0.3)
     axes[1].set_xticks(xticks_subplots)
 
-    fig.suptitle("Tree-Ring Width and Mean δ$^{18}$O per Year", fontsize=15)
+    fig.suptitle(
+        "Tree-Ring Width and Mean δ$^{18}$O per Year",
+        fontsize=SUPTITLE_FONTSIZE
+    )
+
     fig.tight_layout(rect=[0, 0, 1, 0.94])
     fig.savefig(OUT_SUBPLOTS, dpi=DPI)
     plt.close(fig)
@@ -202,9 +315,28 @@ def main():
         label=TRW_LABEL
     )
 
-    ax1.set_xlabel("Year")
-    ax1.set_ylabel(TRW_YLABEL, color=TRW_COLOR, fontsize=YLABEL_FONTSIZE)
-    ax1.tick_params(axis="y", labelcolor=TRW_COLOR, labelsize=YTICK_FONTSIZE)
+    ax1.set_xlabel(
+        "Year",
+        fontsize=XLABEL_FONTSIZE
+    )
+
+    ax1.set_ylabel(
+        TRW_YLABEL,
+        color=TRW_COLOR,
+        fontsize=YLABEL_FONTSIZE
+    )
+
+    ax1.tick_params(
+        axis="x",
+        labelsize=XTICK_FONTSIZE
+    )
+
+    ax1.tick_params(
+        axis="y",
+        labelcolor=TRW_COLOR,
+        labelsize=YTICK_FONTSIZE
+    )
+
     ax1.grid(True, alpha=0.3)
     ax1.set_xticks(xticks)
 
@@ -220,8 +352,17 @@ def main():
         label=D18O_LABEL
     )
 
-    ax2.set_ylabel(D18O_YLABEL, color=D18O_COLOR, fontsize=YLABEL_FONTSIZE)
-    ax2.tick_params(axis="y", labelcolor=D18O_COLOR, labelsize=YTICK_FONTSIZE)
+    ax2.set_ylabel(
+        D18O_YLABEL,
+        color=D18O_COLOR,
+        fontsize=YLABEL_FONTSIZE
+    )
+
+    ax2.tick_params(
+        axis="y",
+        labelcolor=D18O_COLOR,
+        labelsize=YTICK_FONTSIZE
+    )
 
     # Combined legend
     lines = [line1, line2]
@@ -230,11 +371,15 @@ def main():
     ax1.legend(
         lines,
         labels,
-        loc="upper left",
-        fontsize=9
+        loc="lower left",
+        fontsize=LEGEND_FONTSIZE
     )
 
-    plt.title("Tree-Ring Width and Mean δ$^{18}$O per Year")
+    plt.title(
+        "Tree-Ring Width and Mean δ$^{18}$O per Year",
+        fontsize=TITLE_FONTSIZE
+    )
+
     fig.tight_layout()
     fig.savefig(OUT_DUAL_AXIS, dpi=DPI)
     plt.close(fig)

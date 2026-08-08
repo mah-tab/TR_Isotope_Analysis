@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 # -----------------------------
 # Paths (Windows)
 # -----------------------------
+
 # data_files = {
 #     "d18o": r"E:\FAU master\Master Thesis\Data\d18o_per_sample_sorted_corrected_narrow_next_year.xlsx",
 #     "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
@@ -15,39 +16,54 @@ data_files = {
     "d18o": r"E:\FAU master\Master Thesis\Data\d18o Data\new\Henza_O_corrected_final.xlsx",
     "oxygen_percentage": r"E:\FAU master\Master Thesis\Data\d18o Data\oxygen_percentage_per_sample_sorted_corrected.xlsx",
     "amount": r"E:\FAU master\Master Thesis\Data\d18o Data\amount_per_sample_sorted_corrected.xlsx",
-
 }
 
-#output_dir = r"E:\FAU master\Master Thesis\Plots"
-#output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed"
-output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed\new_raw_final"
+# output_dir = r"E:\FAU master\Master Thesis\Plots"
+# output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed"
+output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed\new_raw_final\font_corrected"
 os.makedirs(output_dir, exist_ok=True)
 
 # Where to save statistics
-#stats_output_dir = r"E:\FAU master\Master Thesis\Data"
-#stats_output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed"
-stats_output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed\new_raw_final"
+# stats_output_dir = r"E:\FAU master\Master Thesis\Data"
+# stats_output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed"
+stats_output_dir = r"E:\FAU master\Master Thesis\Results\d18o new narrow missing removed\new_raw_final\font_corrected"
 os.makedirs(stats_output_dir, exist_ok=True)
+
 
 # -----------------------------
 # Styling
 # -----------------------------
+
 box_color = "#00BDD6"
 median_color = "#FF5E69"
+
+# Font sizes
+TITLE_FONTSIZE = 18
+AXIS_LABEL_FONTSIZE = 16
+XTICK_FONTSIZE = 14
+YTICK_FONTSIZE = 14
+
 
 def compute_and_save_stats(df: pd.DataFrame, sample_cols: list, var_key: str) -> None:
     """
     Computes min, Q1, median, mean, Q3, max per sample column (ignoring NaNs),
     prints them, and saves them to an Excel file.
+
     Output format:
-      rows = [min, Q1, median, mean, Q3, max]
-      cols = sample names
+    rows = [min, Q1, median, mean, Q3, max]
+    cols = sample names
     """
+
     stats_index = ["min", "Q1", "median", "mean", "Q3", "max"]
-    stats_df = pd.DataFrame(index=stats_index, columns=sample_cols, dtype="float64")
+    stats_df = pd.DataFrame(
+        index=stats_index,
+        columns=sample_cols,
+        dtype="float64"
+    )
 
     for s in sample_cols:
         vals = pd.to_numeric(df[s], errors="coerce").dropna()
+
         if vals.empty:
             continue
 
@@ -65,28 +81,59 @@ def compute_and_save_stats(df: pd.DataFrame, sample_cols: list, var_key: str) ->
     print("=" * 70 + "\n")
 
     # ---- save to excel ----
-    out_name = f"{var_key}_statistics_per_sample.xlsx"  # (fixed to .xlsx)
+    out_name = f"{var_key}_statistics_per_sample.xlsx"
     out_path = os.path.join(stats_output_dir, out_name)
-    stats_df.to_excel(out_path, index=True)
+
+    stats_df.to_excel(
+        out_path,
+        index=True
+    )
+
     print(f"Saved statistics: {out_path}")
 
-def plot_boxplot_from_excel(excel_path: str, title: str, ylabel: str, out_png: str, var_key: str):
+
+def plot_boxplot_from_excel(
+        excel_path: str,
+        title: str,
+        ylabel: str,
+        out_png: str,
+        var_key: str
+):
     df = pd.read_excel(excel_path)
 
     # Expect first column to be Year, remaining columns are samples
-    sample_cols = [c for c in df.columns if c.lower() != "year"]
+    sample_cols = [
+        c for c in df.columns
+        if c.lower() != "year"
+    ]
+
     if not sample_cols:
-        raise ValueError(f"No sample columns found in: {excel_path}. Columns: {list(df.columns)}")
+        raise ValueError(
+            f"No sample columns found in: {excel_path}. "
+            f"Columns: {list(df.columns)}"
+        )
 
     # -----------------------------
-    # NEW SECTION: statistics per sample (does not affect plotting)
+    # NEW SECTION: statistics per sample
+    # (does not affect plotting)
     # -----------------------------
-    compute_and_save_stats(df, sample_cols, var_key)
+    compute_and_save_stats(
+        df,
+        sample_cols,
+        var_key
+    )
 
-    # Collect values per sample, dropping NaNs (missing years stay out of the distribution)
-    data = [pd.to_numeric(df[c], errors="coerce").dropna().values for c in sample_cols]
+    # Collect values per sample, dropping NaNs
+    # (missing years stay out of the distribution)
+    data = [
+        pd.to_numeric(
+            df[c],
+            errors="coerce"
+        ).dropna().values
+        for c in sample_cols
+    ]
 
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(8, 5))
 
     plt.boxplot(
         data,
@@ -94,10 +141,28 @@ def plot_boxplot_from_excel(excel_path: str, title: str, ylabel: str, out_png: s
         vert=True,
         patch_artist=True,
         showfliers=True,
-        boxprops=dict(facecolor=box_color, edgecolor=box_color, linewidth=1.5),
-        whiskerprops=dict(color=box_color, linewidth=1.5),
-        capprops=dict(color=box_color, linewidth=1.5),
-        medianprops=dict(color=median_color, linewidth=2.5),
+
+        boxprops=dict(
+            facecolor=box_color,
+            edgecolor=box_color,
+            linewidth=1.5
+        ),
+
+        whiskerprops=dict(
+            color=box_color,
+            linewidth=1.5
+        ),
+
+        capprops=dict(
+            color=box_color,
+            linewidth=1.5
+        ),
+
+        medianprops=dict(
+            color=median_color,
+            linewidth=2.5
+        ),
+
         flierprops=dict(
             marker="o",
             markersize=5,
@@ -107,24 +172,57 @@ def plot_boxplot_from_excel(excel_path: str, title: str, ylabel: str, out_png: s
         ),
     )
 
-    plt.title(title)
-    plt.ylabel(ylabel)
-    plt.xlabel("Sample")
-    plt.xticks(rotation=0)
+    # Bigger fonts
+    plt.title(
+        title,
+        fontsize=TITLE_FONTSIZE
+    )
+
+    plt.ylabel(
+        ylabel,
+        fontsize=AXIS_LABEL_FONTSIZE
+    )
+
+    plt.xlabel(
+        "Sample",
+        fontsize=AXIS_LABEL_FONTSIZE
+    )
+
+    plt.xticks(
+        rotation=0,
+        fontsize=XTICK_FONTSIZE
+    )
+
+    plt.yticks(
+        fontsize=YTICK_FONTSIZE
+    )
+
     plt.tight_layout()
 
-    out_path = os.path.join(output_dir, out_png)
-    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    out_path = os.path.join(
+        output_dir,
+        out_png
+    )
+
+    plt.savefig(
+        out_path,
+        dpi=300,
+        bbox_inches="tight"
+    )
+
     plt.close()
+
     print(f"Saved: {out_path}")
+
 
 # -----------------------------
 # Make the 3 plots (+ stats exports)
 # -----------------------------
+
 plot_boxplot_from_excel(
     data_files["d18o"],
-    title="d18O per sample (1974–2023)",
-    ylabel="d18O (VSMOW)",
+    title="δ18O per sample (1974–2023)",
+    ylabel="δ18O (VSMOW)",
     out_png="d18o_samples_boxplot.png",
     var_key="d18o"
 )
