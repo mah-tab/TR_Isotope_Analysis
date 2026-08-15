@@ -83,6 +83,8 @@ APPROACH_TO_USE = "SEASONAL"
 # Desired y-axis order from BOTTOM to TOP
 BASE_PARAMS = ["T_Mean", "T_Min", "T_Max", "Precip", "RH", "VPD"]
 
+BASE_PARAMS_WITH_PET = ["T_Mean", "T_Min", "T_Max", "Precip", "PET", "RH", "VPD"]
+
 # Correlation color scale
 COR_SCALE_MIN = -0.75
 COR_SCALE_MAX =  0.75
@@ -104,8 +106,8 @@ ANNOT_FONTSIZE = 16
 CBAR_LABEL_FONTSIZE = 16
 CBAR_TICK_FONTSIZE = 15
 
-STATION_LABEL = "Baft(1989-2023)"
-
+#STATION_LABEL = "Baft(1989-2023)"
+STATION_LABEL = "Baft\n(1989-2023)" # year goes under it
 
 # ============================================================
 # GENERAL HELPERS
@@ -254,7 +256,7 @@ def normalize_variable_from_header(raw_variable):
     if re.match(r"^SPEI\d+$", raw_variable, flags=re.IGNORECASE):
         return None
 
-    allowed = BASE_PARAMS + ["PDSI"]
+    allowed = BASE_PARAMS_WITH_PET + ["PDSI"]
 
     allowed_map = {v.lower(): v for v in allowed}
 
@@ -574,14 +576,14 @@ def read_best_spei(input_dir, response_prefix, method):
 # HEATMAP PLOTTING
 # ============================================================
 
-def build_plot_rows(records, input_dir, response_prefix, method):
+def build_plot_rows(records, input_dir, response_prefix, method, base_params=BASE_PARAMS):
     """
     Builds the rows for one proxy/method heatmap.
     """
 
     rows = []
 
-    for variable in BASE_PARAMS + ["PDSI"]:
+    for variable in base_params + ["PDSI"]:
 
         rec = get_summary_record(
             records=records,
@@ -624,7 +626,14 @@ def build_plot_rows(records, input_dir, response_prefix, method):
     return rows
 
 
-def plot_one_column_heatmap(rows, output_dir, proxy_label, file_proxy, method):
+def plot_one_column_heatmap(
+    rows,
+    output_dir,
+    proxy_label,
+    file_proxy,
+    method,
+    filename_suffix=""
+):
     """
     Saves the one-column Baft heatmap for one proxy and one correlation method.
     """
@@ -634,7 +643,7 @@ def plot_one_column_heatmap(rows, output_dir, proxy_label, file_proxy, method):
     # Save the data used for this plot
     csv_path = os.path.join(
         output_dir,
-        f"Baft_heatmap_{file_proxy}_with_PDSI_SPEI_{method}_values.csv"
+        f"Baft_heatmap_{file_proxy}_with_PDSI_SPEI_{method}{filename_suffix}_values.csv"
     )
 
     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
@@ -676,12 +685,21 @@ def plot_one_column_heatmap(rows, output_dir, proxy_label, file_proxy, method):
         vmin=COR_SCALE_MIN,
         vmax=COR_SCALE_MAX
     )
+# tilted Baft label
+    # plt.xticks(
+    #     [0],
+    #     [STATION_LABEL],
+    #     rotation=45,
+    #     ha="right",
+    #     fontsize=XTICK_FONTSIZE,
+    #     fontweight="bold"
+    # )
 
     plt.xticks(
         [0],
         [STATION_LABEL],
-        rotation=45,
-        ha="right",
+        rotation=0,
+        ha="center",
         fontsize=XTICK_FONTSIZE,
         fontweight="bold"
     )
@@ -770,7 +788,7 @@ def plot_one_column_heatmap(rows, output_dir, proxy_label, file_proxy, method):
 
     out_png = os.path.join(
         output_dir,
-        f"Baft_heatmap_{file_proxy}_with_PDSI_SPEI_{method}.png"
+        f"Baft_heatmap_{file_proxy}_with_PDSI_SPEI_{method}{filename_suffix}.png"
     )
 
     plt.savefig(
@@ -844,6 +862,23 @@ def run_proxy_analysis(input_dir, output_dir, proxy_label, file_proxy, response_
             proxy_label=proxy_label,
             file_proxy=file_proxy,
             method=method
+        )
+
+        rows_with_pet = build_plot_rows(
+            records=records,
+            input_dir=input_dir,
+            response_prefix=response_prefix,
+            method=method,
+            base_params=BASE_PARAMS_WITH_PET
+        )
+
+        plot_one_column_heatmap(
+            rows=rows_with_pet,
+            output_dir=output_dir,
+            proxy_label=proxy_label,
+            file_proxy=file_proxy,
+            method=method,
+            filename_suffix="_with PET"
         )
 
     best_summary_df = pd.DataFrame(best_spei_summary)
