@@ -20,7 +20,9 @@ library(scales)
 d18o_path    <- "E:/FAU master/Master Thesis/Data/d18o Data/new/Henza_mean_chron_final.xlsx"
 climate_path <- "E:/FAU master/Master Thesis/Data/d18o Data/new/Baft-clim_with_SPEIS.xlsx"
 
-out_dir <- "E:/FAU master/Master Thesis/Results/d18o Baft correlation/New_raw_final/spearmann"
+#out_dir <- "E:/FAU master/Master Thesis/Results/d18o Baft correlation/New_raw_final/spearmann"
+out_dir <- "E:/FAU master/Master Thesis/Results/d18o Baft correlation/New_raw_final/window 6months/spearmann"
+
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 # -----------------------------
@@ -35,12 +37,12 @@ COR_SCALE_MAX <-  0.75
 COR_SCALE_BREAKS <- c(-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75)
 
 # Font sizes for all plots
-TITLE_FONTSIZE <- 20
-SUBTITLE_FONTSIZE <- 16
-AXIS_TITLE_FONTSIZE <- 16
-AXIS_TICK_FONTSIZE <- 14
-LEGEND_TITLE_FONTSIZE <- 14
-LEGEND_TEXT_FONTSIZE <- 13
+TITLE_FONTSIZE <- 25
+SUBTITLE_FONTSIZE <- 21
+AXIS_TITLE_FONTSIZE <- 21
+AXIS_TICK_FONTSIZE <- 21
+LEGEND_TITLE_FONTSIZE <- 19
+LEGEND_TEXT_FONTSIZE <- 18
 
 # Spearman only for now
 cor_methods <- c("spearman")
@@ -741,7 +743,8 @@ for (v in climate_vars) {
       seed = 123,
       tidy_env_data = TRUE,
       boot_n = 100,
-      month_interval = c(-1, 12)
+#      month_interval = c(-1, 12)
+      month_interval = c(-12, 5)
     )
     
     cat("\n==============================\n")
@@ -843,3 +846,4 @@ cat("1) ALL_correlation_windows_with_pvalues.csv\n")
 cat("2) ALL_significant_results_p_lt_0.05.csv\n")
 cat("3) ALL_significant_results_p_lt_0.01.csv\n")
 cat("4) ALL_best_window_per_variable_and_approach.csv\n")
+

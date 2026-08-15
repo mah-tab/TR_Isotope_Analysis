@@ -36,9 +36,14 @@ import matplotlib.pyplot as plt
 # CONFIG
 # ============================================================
 
+# D18_BAFT_DIR = (
+#     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
+#     r"\Narrow missing removed\d18 climate correlation\All_summary_texts\Baft_new"
+# )
+
 D18_BAFT_DIR = (
     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
-    r"\Narrow missing removed\d18 climate correlation\All_summary_texts\Baft_new"
+    r"\Narrow missing removed\d18 climate correlation\All_summary_texts\Baft_new\window 6 months"
 )
 
 TRW_BAFT_DIR = (
@@ -46,15 +51,26 @@ TRW_BAFT_DIR = (
     r"\Narrow missing removed\TRW climate correlation\All_summary_texts\Baft_new"
 )
 
+# D18_OUTPUT_DIR = (
+#     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
+#     r"\Narrow missing removed\d18 climate correlation\python outputs\new raw final"
+# )
+
 D18_OUTPUT_DIR = (
     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
-    r"\Narrow missing removed\d18 climate correlation\python outputs\new raw final"
+    r"\Narrow missing removed\d18 climate correlation\python outputs\new raw final 6 months"
 )
+
+# TRW_OUTPUT_DIR = (
+#     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
+#     r"\Narrow missing removed\TRW climate correlation\python outputs\new raw final"
+# )
 
 TRW_OUTPUT_DIR = (
     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
-    r"\Narrow missing removed\TRW climate correlation\python outputs\new raw final"
+    r"\Narrow missing removed\TRW climate correlation\python outputs\new raw final 6 months"
 )
+
 
 os.makedirs(D18_OUTPUT_DIR, exist_ok=True)
 os.makedirs(TRW_OUTPUT_DIR, exist_ok=True)
@@ -77,11 +93,16 @@ CMAP = "RdBu_r"
 FIG_W = 5.5
 FIG_H = 9.0
 
-ANNOT_FONTSIZE = 13
-XTICK_FONTSIZE = 13
-YTICK_FONTSIZE = 15
-TITLE_FONTSIZE = 17
-CBAR_FONTSIZE = 13
+# Font sizes
+TITLE_FONTSIZE = 18
+
+XTICK_FONTSIZE = 16
+YTICK_FONTSIZE = 16
+
+ANNOT_FONTSIZE = 16
+
+CBAR_LABEL_FONTSIZE = 16
+CBAR_TICK_FONTSIZE = 15
 
 STATION_LABEL = "Baft(1989-2023)"
 
@@ -143,6 +164,31 @@ def clean_window_text(x):
 
     if x == "" or x.lower() == "nan":
         return "NA"
+
+    # Convert newer dendroTools notation to the older star notation.
+    # Old-format strings such as "May*", "Dec* - Jun", or "Apr - May"
+    # do not match these patterns and therefore remain unchanged.
+    months = r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+
+    # Previous year:
+    # Y-1 Nov -> Nov*
+    # Y-1 Dec - Y May -> Dec* - May
+    x = re.sub(
+        rf"\bY\s*-\s*1\s+{months}\b",
+        lambda m: f"{m.group(1).title()}*",
+        x,
+        flags=re.IGNORECASE
+    )
+
+    # Current year:
+    # Y Apr -> Apr
+    # Y Apr - Y May -> Apr - May
+    x = re.sub(
+        rf"\bY\s+{months}\b",
+        lambda m: m.group(1).title(),
+        x,
+        flags=re.IGNORECASE
+    )
 
     return x
 
@@ -614,7 +660,12 @@ def plot_one_column_heatmap(rows, output_dir, proxy_label, file_proxy, method):
         else:
             annotations_bottom_to_top.append(f"{r:.2f}\n{w}")
 
-    annotations = np.flipud(np.array(annotations_bottom_to_top, dtype=object).reshape(-1, 1))
+    annotations = np.flipud(
+        np.array(
+            annotations_bottom_to_top,
+            dtype=object
+        ).reshape(-1, 1)
+    )
 
     plt.figure(figsize=(FIG_W, FIG_H))
 
@@ -649,18 +700,37 @@ def plot_one_column_heatmap(rows, output_dir, proxy_label, file_proxy, method):
     )
 
     cbar = plt.colorbar(im, fraction=0.12, pad=0.05)
+
     cbar.set_label(
         f"{method_title(method)} r",
-        fontsize=CBAR_FONTSIZE,
+        fontsize=CBAR_LABEL_FONTSIZE,
         fontweight="bold"
     )
-    cbar.ax.tick_params(labelsize=CBAR_FONTSIZE)
+
+    cbar.ax.tick_params(
+        labelsize=CBAR_TICK_FONTSIZE
+    )
 
     ax = plt.gca()
 
     # Gridlines
-    ax.set_xticks(np.arange(-0.5, 1.5, 1), minor=True)
-    ax.set_yticks(np.arange(-0.5, len(y_labels), 1), minor=True)
+    ax.set_xticks(
+        np.arange(
+            -0.5,
+            1.5,
+            1
+        ),
+        minor=True
+    )
+
+    ax.set_yticks(
+        np.arange(
+            -0.5,
+            len(y_labels),
+            1
+        ),
+        minor=True
+    )
 
     plt.grid(
         which="minor",

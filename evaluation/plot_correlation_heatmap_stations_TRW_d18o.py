@@ -2,7 +2,7 @@
 Creates station-comparison heatmaps for climate correlations.
 
 Input:
-  1) d18O extracted master Excel:
+  1) d18O extracted master Excel: (Output from running correlation_summary_txt_analysis.py)
      summary_correlations_all_climate_params.xlsx
 
   2) TRW extracted master Excel:
@@ -45,15 +45,26 @@ import matplotlib.pyplot as plt
 # CONFIG
 # ============================================================
 
+# D18_OUTPUT_DIR = (
+#     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
+#     r"\Narrow missing removed\d18 climate correlation\python outputs\new raw final"
+# )
+
 D18_OUTPUT_DIR = (
     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
-    r"\Narrow missing removed\d18 climate correlation\python outputs\new raw final"
+    r"\Narrow missing removed\d18 climate correlation\python outputs\new raw final 6 months"
 )
+
+# TRW_OUTPUT_DIR = (
+#     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
+#     r"\Narrow missing removed\TRW climate correlation\python outputs\new raw final"
+# )
 
 TRW_OUTPUT_DIR = (
     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
-    r"\Narrow missing removed\TRW climate correlation\python outputs\new raw final"
+    r"\Narrow missing removed\TRW climate correlation\python outputs\new raw final 6 months"
 )
+
 
 D18_MASTER_XLSX = os.path.join(
     D18_OUTPUT_DIR,
@@ -73,41 +84,75 @@ CORR_METHODS = ["pearson", "spearman", "kendall"]
 # Desired Y-axis order from BOTTOM -> TOP
 INCLUDE_PARAMS = ["T_Mean", "T_Min", "T_Max", "Precip", "RH", "VPD"]
 
-# Station order exactly like your old plot, after removing dropped stations.
+# Station order exactly like old plot, after removing dropped stations.
 # Keys are possible internal station names from the Excel files.
 # Values are labels shown on x-axis.
+# STATION_DISPLAY_BASE = {
+#     "anar": "Anar(1986-2023)",
+#     "Baft": "Baft(1989-2023)",
+#     "Bam_1980": "Bam(1980-2023)",  # DROP
+#     "Bam_clim": "Bam(1974-2023)",
+#     "Kerman - 1969": "Kerman(wo ea es 1974-2023)",  # DROP
+#     "kerman": "Kerman(1974-2023)",
+#     "kerman_1980": "Kerman(1980-2023)",  # DROP
+#     "jiroft_clim": "Jiroft(1990-2023)",
+#     "rafsanjan_clim": "Rafsanjan(1993-2023)",
+#     "shahrebabak_clim": "Shahrebabak(1987-2023)",
+#     "sirjan_clim": "Sirjan(1985-2023)",
+#     "jiroft+Baft_clim": "Jiroft+Baft(1989-2023)",  # DROP
+#     "jiroft+Baft": "Jiroft+Baft(wo some rows1989-2023)",  # DROP
+# }
+# showing the year interval below the name
 STATION_DISPLAY_BASE = {
-    "anar": "Anar(1986-2023)",
-    "Baft": "Baft(1989-2023)",
-    "Bam_1980": "Bam(1980-2023)",  # DROP
-    "Bam_clim": "Bam(1974-2023)",
-    "Kerman - 1969": "Kerman(wo ea es 1974-2023)",  # DROP
-    "kerman": "Kerman(1974-2023)",
-    "kerman_1980": "Kerman(1980-2023)",  # DROP
-    "jiroft_clim": "Jiroft(1990-2023)",
-    "rafsanjan_clim": "Rafsanjan(1993-2023)",
-    "shahrebabak_clim": "Shahrebabak(1987-2023)",
-    "sirjan_clim": "Sirjan(1985-2023)",
-    "jiroft+Baft_clim": "Jiroft+Baft(1989-2023)",  # DROP
-    "jiroft+Baft": "Jiroft+Baft(wo some rows1989-2023)",  # DROP
+    "anar": "Anar\n(1986-2023)",
+    "Baft": "Baft\n(1989-2023)",
+    "Bam_1980": "Bam\n(1980-2023)",  # DROP
+    "Bam_clim": "Bam\n(1974-2023)",
+    "Kerman - 1969": "Kerman\n(wo ea es 1974-2023)",  # DROP
+    "kerman": "Kerman\n(1974-2023)",
+    "kerman_1980": "Kerman\n(1980-2023)",  # DROP
+    "jiroft_clim": "Jiroft\n(1990-2023)",
+    "rafsanjan_clim": "Rafsanjan\n(1993-2023)",
+    "shahrebabak_clim": "Shahrebabak\n(1987-2023)",
+    "sirjan_clim": "Sirjan\n(1985-2023)",
+    "jiroft+Baft_clim": "Jiroft+Baft\n(1989-2023)",  # DROP
+    "jiroft+Baft": "Jiroft+Baft\n(wo some rows 1989-2023)",  # DROP
 }
 
 # Same order, but also supports TRW filenames with _TRW suffix.
+# STATION_DISPLAY_TRW = {
+#     "anar_TRW": "Anar(1986-2023)",
+#     "Baft_TRW": "Baft(1989-2023)",
+#     "Bam_1980_TRW": "Bam(1980-2023)",  # DROP
+#     "Bam_clim_TRW": "Bam(1974-2023)",
+#     "Kerman - 1969_TRW": "Kerman(wo ea es 1974-2023)",  # DROP
+#     "kerman_TRW": "Kerman(1974-2023)",
+#     "kerman_1980_TRW": "Kerman(1980-2023)",  # DROP
+#     "jiroft_clim_TRW": "Jiroft(1990-2023)",
+#     "rafsanjan_clim_TRW": "Rafsanjan(1993-2023)",
+#     "shahrebabak_clim_TRW": "Shahrebabak(1987-2023)",
+#     "sirjan_clim_TRW": "Sirjan(1985-2023)",
+#     "jiroft+Baft_clim_TRW": "Jiroft+Baft(1989-2023)",  # DROP
+#     "jiroft+Baft_TRW": "Jiroft+Baft(wo some rows1989-2023)",  # DROP
+# }
+
 STATION_DISPLAY_TRW = {
-    "anar_TRW": "Anar(1986-2023)",
-    "Baft_TRW": "Baft(1989-2023)",
-    "Bam_1980_TRW": "Bam(1980-2023)",  # DROP
-    "Bam_clim_TRW": "Bam(1974-2023)",
-    "Kerman - 1969_TRW": "Kerman(wo ea es 1974-2023)",  # DROP
-    "kerman_TRW": "Kerman(1974-2023)",
-    "kerman_1980_TRW": "Kerman(1980-2023)",  # DROP
-    "jiroft_clim_TRW": "Jiroft(1990-2023)",
-    "rafsanjan_clim_TRW": "Rafsanjan(1993-2023)",
-    "shahrebabak_clim_TRW": "Shahrebabak(1987-2023)",
-    "sirjan_clim_TRW": "Sirjan(1985-2023)",
-    "jiroft+Baft_clim_TRW": "Jiroft+Baft(1989-2023)",  # DROP
-    "jiroft+Baft_TRW": "Jiroft+Baft(wo some rows1989-2023)",  # DROP
+    "anar_TRW": "Anar\n(1986-2023)",
+    "Baft_TRW": "Baft\n(1989-2023)",
+    "Bam_1980_TRW": "Bam\n(1980-2023)",  # DROP
+    "Bam_clim_TRW": "Bam\n(1974-2023)",
+    "Kerman - 1969_TRW": "Kerman\n(wo ea es 1974-2023)",  # DROP
+    "kerman_TRW": "Kerman\n(1974-2023)",
+    "kerman_1980_TRW": "Kerman\n(1980-2023)",  # DROP
+    "jiroft_clim_TRW": "Jiroft\n(1990-2023)",
+    "rafsanjan_clim_TRW": "Rafsanjan\n(1993-2023)",
+    "shahrebabak_clim_TRW": "Shahrebabak\n(1987-2023)",
+    "sirjan_clim_TRW": "Sirjan\n(1985-2023)",
+    "jiroft+Baft_clim_TRW": "Jiroft+Baft\n(1989-2023)",  # DROP
+    "jiroft+Baft_TRW": "Jiroft+Baft\n(wo some rows 1989-2023)",  # DROP
 }
+
+
 
 DROP_STATIONS_BASE = {
     "Bam_1980",
@@ -135,11 +180,13 @@ DROP_STATIONS_TRW = {
 FIG_W = 18
 FIG_H = 8
 
-ANNOT_FONTSIZE = 11
-XTICK_FONTSIZE = 12
-YTICK_FONTSIZE = 14
-TITLE_FONTSIZE = 20
-CBAR_FONTSIZE = 14
+# Font sizes
+ANNOT_FONTSIZE = 16          # numbers + optimal time windows inside heatmap cells
+XTICK_FONTSIZE = 16          # station names
+YTICK_FONTSIZE = 16          # climate variable names
+TITLE_FONTSIZE = 22          # main heatmap title
+CBAR_LABEL_FONTSIZE = 16     # colorbar title
+CBAR_TICK_FONTSIZE = 15      # colorbar numbers
 
 CMAP = "RdBu_r"
 
@@ -231,11 +278,40 @@ def value_to_float(x):
 def window_to_text(x):
     if x is None:
         return "NA"
+
     if isinstance(x, float) and np.isnan(x):
         return "NA"
+
     x = str(x).strip()
+
     if x == "" or x.lower() == "nan":
         return "NA"
+
+    # Convert newer dendroTools notation to the older star notation.
+    # Old-format strings such as "May*", "Dec* - Jun", or "Apr - May"
+    # do not match these patterns and therefore remain unchanged.
+    months = r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+
+    # Previous year:
+    # Y-1 Nov -> Nov*
+    # Y-1 Dec - Y May -> Dec* - May
+    x = re.sub(
+        rf"\bY\s*-\s*1\s+{months}\b",
+        lambda m: f"{m.group(1).title()}*",
+        x,
+        flags=re.IGNORECASE
+    )
+
+    # Current year:
+    # Y Apr -> Apr
+    # Y Apr - Y May -> Apr - May
+    x = re.sub(
+        rf"\bY\s+{months}\b",
+        lambda m: m.group(1).title(),
+        x,
+        flags=re.IGNORECASE
+    )
+
     return x
 
 
@@ -387,19 +463,34 @@ def create_station_heatmap(
             fontweight="bold"
         )
 
-        cbar = plt.colorbar(im, fraction=0.03, pad=0.02)
+        cbar = plt.colorbar(
+            im,
+            fraction=0.03,
+            pad=0.02
+        )
+
         cbar.set_label(
             f"{method_title(method)} r (maximal_calculated_metric)",
-            fontsize=CBAR_FONTSIZE,
+            fontsize=CBAR_LABEL_FONTSIZE,
             fontweight="bold"
         )
-        cbar.ax.tick_params(labelsize=CBAR_FONTSIZE)
+
+        cbar.ax.tick_params(
+            labelsize=CBAR_TICK_FONTSIZE
+        )
 
         ax = plt.gca()
 
         # White cell gridlines
-        ax.set_xticks(np.arange(-0.5, len(station_order), 1), minor=True)
-        ax.set_yticks(np.arange(-0.5, len(y_labels), 1), minor=True)
+        ax.set_xticks(
+            np.arange(-0.5, len(station_order), 1),
+            minor=True
+        )
+
+        ax.set_yticks(
+            np.arange(-0.5, len(y_labels), 1),
+            minor=True
+        )
 
         plt.grid(
             which="minor",

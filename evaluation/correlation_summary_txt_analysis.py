@@ -45,15 +45,27 @@ BASE_INPUT_DIR = (
     r"\Narrow missing removed\d18 climate correlation\All_summary_texts"
 )
 
+# BAFT_NEW_DIR = (
+#     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
+#     r"\Narrow missing removed\d18 climate correlation\All_summary_texts\Baft_new"
+# )
+
 BAFT_NEW_DIR = (
     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
-    r"\Narrow missing removed\d18 climate correlation\All_summary_texts\Baft_new"
+    r"\Narrow missing removed\d18 climate correlation\All_summary_texts\Baft_new\window 6 months"
 )
+
+
+# OUTPUT_DIR = (
+#     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
+#     r"\Narrow missing removed\d18 climate correlation\python outputs\new raw final"
+# )
 
 OUTPUT_DIR = (
     r"E:\FAU master\Master Thesis\Correlation\Correlation outputs"
-    r"\Narrow missing removed\d18 climate correlation\python outputs\new raw final"
+    r"\Narrow missing removed\d18 climate correlation\python outputs\new raw final 6 months"
 )
+
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
