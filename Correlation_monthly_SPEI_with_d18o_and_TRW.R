@@ -22,8 +22,8 @@ trw_path  <- "E:/FAU master/Master Thesis/Data/Tree Ring Width Chronology/TRW_ch
 
 climate_path <- "E:/FAU master/Master Thesis/Data/d18o Data/new/Baft-clim_with_SPEIS.xlsx"
 
-out_dir_d18o <- "E:/FAU master/Master Thesis/Results/d18o Baft correlation/SPEI_monthly_heatmap/kendall"
-out_dir_trw  <- "E:/FAU master/Master Thesis/Results/TRW Baft correlation/SPEI_monthly_heatmap/kendall"
+out_dir_d18o <- "E:/FAU master/Master Thesis/Results/d18o Baft correlation/SPEI_monthly_heatmap/spearmann"
+out_dir_trw  <- "E:/FAU master/Master Thesis/Results/TRW Baft correlation/SPEI_monthly_heatmap/spearmann"
 
 dir.create(out_dir_d18o, showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir_trw, showWarnings = FALSE, recursive = TRUE)
@@ -34,7 +34,7 @@ dir.create(out_dir_trw, showWarnings = FALSE, recursive = TRUE)
 START_YEAR <- 1989
 END_YEAR   <- 2023
 
-cor_method <- "kendall"
+cor_method <- "spearman"
 
 SPEI_vars <- paste0("SPEI", 1:10)
 
@@ -48,13 +48,15 @@ COR_SCALE_MIN <- -0.75
 COR_SCALE_MAX <-  0.75
 COR_SCALE_BREAKS <- c(-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75)
 
-# Font sizes
-TITLE_FONTSIZE <- 20
-SUBTITLE_FONTSIZE <- 16
-AXIS_TITLE_FONTSIZE <- 16
-AXIS_TICK_FONTSIZE <- 14
-LEGEND_TITLE_FONTSIZE <- 14
-LEGEND_TEXT_FONTSIZE <- 13
+
+# Font sizes for all plots
+TITLE_FONTSIZE <- 25
+SUBTITLE_FONTSIZE <- 21
+AXIS_TITLE_FONTSIZE <- 21
+AXIS_TICK_FONTSIZE <- 21
+LEGEND_TITLE_FONTSIZE <- 19
+LEGEND_TEXT_FONTSIZE <- 18
+
 
 # -----------------------------
 # Read climate/SPEI data
@@ -222,7 +224,7 @@ save_spei_heatmap <- function(cor_df, response_label, out_dir, file_prefix) {
       title = paste0(response_label, " vs SPEI1-SPEI10"),
       subtitle = paste0("Spearman correlation, ", START_YEAR, "-", END_YEAR),
       x = "Month",
-      y = "Standardized Precipitation-Evapotranspiration Index (SPEI)"
+      y = "SPEI"
     ) +
     theme_minimal(base_size = 14) +
     theme(
@@ -308,7 +310,7 @@ save_spei_abs_heatmap <- function(cor_df, response_label, out_dir, file_prefix) 
       title = paste0(response_label, " vs SPEI1-SPEI10"),
       subtitle = paste0("Absolute Spearman correlation, ", START_YEAR, "-", END_YEAR),
       x = "Month",
-      y = "Standardized Precipitation-Evapotranspiration Index (SPEI)"
+      y = "SPEI"
     ) +
     theme_minimal(base_size = 14) +
     theme(

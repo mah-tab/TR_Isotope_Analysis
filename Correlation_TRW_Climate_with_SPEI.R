@@ -35,12 +35,12 @@ COR_SCALE_MAX <-  0.75
 COR_SCALE_BREAKS <- c(-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75)
 
 # Font sizes for all plots
-TITLE_FONTSIZE <- 20
-SUBTITLE_FONTSIZE <- 16
-AXIS_TITLE_FONTSIZE <- 16
-AXIS_TICK_FONTSIZE <- 14
-LEGEND_TITLE_FONTSIZE <- 14
-LEGEND_TEXT_FONTSIZE <- 13
+TITLE_FONTSIZE <- 25
+SUBTITLE_FONTSIZE <- 21
+AXIS_TITLE_FONTSIZE <- 21
+AXIS_TICK_FONTSIZE <- 21
+LEGEND_TITLE_FONTSIZE <- 19
+LEGEND_TEXT_FONTSIZE <- 18
 
 # Spearman only for now
 cor_methods <- c("spearman")
@@ -843,3 +843,4 @@ cat("1) ALL_TRW_correlation_windows_with_pvalues.csv\n")
 cat("2) ALL_TRW_significant_results_p_lt_0.05.csv\n")
 cat("3) ALL_TRW_significant_results_p_lt_0.01.csv\n")
 cat("4) ALL_TRW_best_window_per_variable_and_approach.csv\n")
+

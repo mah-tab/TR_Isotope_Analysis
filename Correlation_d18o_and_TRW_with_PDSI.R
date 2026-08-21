@@ -21,8 +21,8 @@ d18o_path <- "E:/FAU master/Master Thesis/Data/d18o Data/new/Henza_mean_chron_fi
 trw_path  <- "E:/FAU master/Master Thesis/Data/Tree Ring Width Chronology/TRW_chronology_mean_alone.xlsx"
 pdsi_path <- "E:/FAU master/Master Thesis/Data/climate data/pdsi.xlsx"
 
-out_dir_d18o <- "E:/FAU master/Master Thesis/Results/d18o Baft correlation/PDSI/35 years/pearson"
-out_dir_trw  <- "E:/FAU master/Master Thesis/Results/TRW Baft correlation/PDSI/35 years/pearson"
+out_dir_d18o <- "E:/FAU master/Master Thesis/Results/d18o Baft correlation/PDSI/35 years/spearmann"
+out_dir_trw  <- "E:/FAU master/Master Thesis/Results/TRW Baft correlation/PDSI/35 years/spearmann"
 
 dir.create(out_dir_d18o, showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir_trw, showWarnings = FALSE, recursive = TRUE)
@@ -49,15 +49,15 @@ COR_SCALE_MAX <-  0.75
 COR_SCALE_BREAKS <- c(-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75)
 
 # Font sizes for all plots
-TITLE_FONTSIZE <- 20
-SUBTITLE_FONTSIZE <- 16
-AXIS_TITLE_FONTSIZE <- 16
-AXIS_TICK_FONTSIZE <- 14
-LEGEND_TITLE_FONTSIZE <- 14
-LEGEND_TEXT_FONTSIZE <- 13
+TITLE_FONTSIZE <- 25
+SUBTITLE_FONTSIZE <- 21
+AXIS_TITLE_FONTSIZE <- 21
+AXIS_TICK_FONTSIZE <- 21
+LEGEND_TITLE_FONTSIZE <- 19
+LEGEND_TEXT_FONTSIZE <- 18
 
 # Spearman only for now
-cor_methods <- c("pearson")
+cor_methods <- c("spearman")
 
 # Later, use one of these instead:
 # cor_methods <- c("pearson")
