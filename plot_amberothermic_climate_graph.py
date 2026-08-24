@@ -99,12 +99,12 @@ bars = ax_precip.bar(
     label="Precipitation"
 )
 
-ax_precip.set_xlabel("Month", fontsize=13, fontweight="bold")
-ax_precip.set_ylabel("Precipitation (mm)", color=precip_color, fontsize=13, fontweight="bold")
-ax_precip.tick_params(axis="y", labelcolor=precip_color)
+ax_precip.set_xlabel("Month", fontsize=16, fontweight="bold")
+ax_precip.set_ylabel("Precipitation (mm)", color=precip_color, fontsize=16, fontweight="bold")
+ax_precip.tick_params(axis="y", labelcolor=precip_color, labelsize=14)
 
 ax_precip.set_xticks(range(1, 13))
-ax_precip.set_xticklabels(month_labels, fontsize=11)
+ax_precip.set_xticklabels(month_labels, fontsize=14)
 
 # Give precipitation axis a clean range
 precip_max = monthly_mean["Precip"].max()
@@ -148,8 +148,8 @@ line_tmin, = ax_temp.plot(
     label="T-min"
 )
 
-ax_temp.set_ylabel("Temperature (°C)", color=tmean_color, fontsize=13, fontweight="bold")
-ax_temp.tick_params(axis="y", labelcolor=tmean_color)
+ax_temp.set_ylabel("Temperature (°C)", color=tmean_color, fontsize=16, fontweight="bold")
+ax_temp.tick_params(axis="y", labelcolor=tmean_color, labelsize=14)
 
 # Give temperature axis a clean range
 temp_min = monthly_mean[["T_Min", "T_Mean", "T_Max"]].min().min()
@@ -159,7 +159,7 @@ ax_temp.set_ylim(temp_min - 3, temp_max + 3)
 # -----------------------------
 # Title, grid, and legend
 # -----------------------------
-plt.title("Amberothermic Climate Graph — Baft", fontsize=15, fontweight="bold")
+plt.title("Amberothermic Climate Graph — Baft", fontsize=18, fontweight="bold")
 
 ax_precip.grid(axis="y", alpha=0.3)
 
@@ -174,7 +174,7 @@ ax_precip.legend(
     bbox_to_anchor=(0.5, -0.12),
     ncol=4,
     frameon=False,
-    fontsize=11
+    fontsize=15
 )
 
 plt.tight_layout()
