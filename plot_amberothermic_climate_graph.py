@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # -----------------------------
 input_file = r"E:\FAU master\Master Thesis\Data\climate data\Baft_clim.xlsx"
 
-output_dir = r"E:\FAU master\Master Thesis\Plots\climate"
+output_dir = r"E:\FAU master\Master Thesis\Results\Climate"
 os.makedirs(output_dir, exist_ok=True)
 
 output_png = os.path.join(output_dir, "amberothermic_Baft_clim.png")
